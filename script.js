@@ -4036,32 +4036,6 @@ class QRGeneratorPro {
             });
         }
 
-        // 4) Default FG Color
-        const fgInput = document.getElementById('setting-fg-color');
-        if (fgInput) {
-            fgInput.value = this.appSettings.defaultFg;
-            fgInput.addEventListener('change', (e) => {
-                this.appSettings.defaultFg = e.target.value;
-                this.customization.fgColor = e.target.value;
-                const p3fg = document.getElementById('fg-color');
-                if (p3fg) p3fg.value = e.target.value;
-                this.saveSettings();
-            });
-        }
-
-        // 5) Default BG Color
-        const bgInput = document.getElementById('setting-bg-color');
-        if (bgInput) {
-            bgInput.value = this.appSettings.defaultBg;
-            bgInput.addEventListener('change', (e) => {
-                this.appSettings.defaultBg = e.target.value;
-                this.customization.bgColor = e.target.value;
-                const p3bg = document.getElementById('bg-color');
-                if (p3bg) p3bg.value = e.target.value;
-                this.saveSettings();
-            });
-        }
-
         // 6) Error Correction Level
         const ecSelect = document.getElementById('setting-error-correction');
         if (ecSelect) {
@@ -4073,15 +4047,9 @@ class QRGeneratorPro {
         }
 
         // Apply initial state
-        this.customization.fgColor = this.appSettings.defaultFg;
-        this.customization.bgColor = this.appSettings.defaultBg;
         this.customization.size = this.appSettings.defaultSize;
-        const p3fg = document.getElementById('fg-color');
-        const p3bg = document.getElementById('bg-color');
         const p3size = document.getElementById('size-slider');
         const p3sizeVal = document.getElementById('size-value');
-        if (p3fg) p3fg.value = this.appSettings.defaultFg;
-        if (p3bg) p3bg.value = this.appSettings.defaultBg;
         if (p3size) p3size.value = this.appSettings.defaultSize;
         if (p3sizeVal) p3sizeVal.textContent = this.appSettings.defaultSize + 'px';
 
