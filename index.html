@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Generator Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Primary QR Library -->
@@ -17,6 +21,137 @@
 
 <body>
     <div class="app-container">
+
+        <!-- Settings Panel -->
+        <div class="settings-panel" id="settings-panel">
+            <div class="settings-panel-inner">
+                <div class="settings-header">
+                    <div class="settings-header-left">
+                        <i class="fas fa-cog settings-header-icon"></i>
+                        <h2>Settings</h2>
+                    </div>
+                    <button class="settings-close-btn" onclick="toggleSettingsPanel()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="settings-body">
+
+                    <!-- Setting 1: High Quality QR (Replacing Grid Columns) -->
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <i class="fas fa-high-definition"></i>
+                            <div>
+                                <span class="setting-title">High Quality QR</span>
+                                <span class="setting-desc">Enhance render sharpness and detail</span>
+                            </div>
+                        </div>
+                        <div class="setting-control">
+                            <label class="toggle">
+                                <input type="checkbox" id="setting-high-quality" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Setting 2: Auto Download -->
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <i class="fas fa-download"></i>
+                            <div>
+                                <span class="setting-title">Auto Download</span>
+                                <span class="setting-desc">Download QR instantly after generation</span>
+                            </div>
+                        </div>
+                        <div class="setting-control">
+                            <label class="toggle">
+                                <input type="checkbox" id="setting-auto-download">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Setting 3: Default QR Size -->
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <i class="fas fa-expand-arrows-alt"></i>
+                            <div>
+                                <span class="setting-title">Default QR Size</span>
+                                <span class="setting-desc">Output resolution in pixels</span>
+                            </div>
+                        </div>
+                        <div class="setting-control range-control">
+                            <input type="range" id="setting-default-size" min="3000" max="8000" step="500" value="3000">
+                            <span class="range-value" id="setting-default-size-val">3000px</span>
+                        </div>
+                    </div>
+
+                    <!-- Setting 4: Default Foreground Color -->
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <i class="fas fa-palette"></i>
+                            <div>
+                                <span class="setting-title">Pattern Color</span>
+                                <span class="setting-desc">Default foreground color for new QRs</span>
+                            </div>
+                        </div>
+                        <div class="setting-control">
+                            <input type="color" id="setting-fg-color" value="#000000" class="color-input">
+                        </div>
+                    </div>
+
+                    <!-- Setting 5: Default Background Color -->
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <i class="fas fa-fill-drip"></i>
+                            <div>
+                                <span class="setting-title">Background Color</span>
+                                <span class="setting-desc">Default background color for new QRs</span>
+                            </div>
+                        </div>
+                        <div class="setting-control">
+                            <input type="color" id="setting-bg-color" value="#ffffff" class="color-input">
+                        </div>
+                    </div>
+
+                    <!-- Setting 6: Error Correction Level -->
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <i class="fas fa-shield-alt"></i>
+                            <div>
+                                <span class="setting-title">Error Correction</span>
+                                <span class="setting-desc">Higher = better scan reliability</span>
+                            </div>
+                        </div>
+                        <div class="setting-control">
+                            <select id="setting-error-correction" class="select-input">
+                                <option value="L">Low (7%)</option>
+                                <option value="M" selected>Medium (15%)</option>
+                                <option value="Q">Quartile (25%)</option>
+                                <option value="H">High (30%)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Danger Zone -->
+                    <div class="setting-item danger-item">
+                        <div class="setting-label">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <div>
+                                <span class="setting-title">Reset Everything</span>
+                                <span class="setting-desc">Clears all history, settings & saved data</span>
+                            </div>
+                        </div>
+                        <div class="setting-control">
+                            <button class="danger-btn" onclick="if(qrGenerator) qrGenerator.clearAppData()">
+                                <i class="fas fa-trash-alt"></i> Wipe
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
         <!-- Sliding History Panel -->
         <div class="history-panel" id="history-panel">
             <div class="history-panel-content">
@@ -27,10 +162,10 @@
                         <span class="history-count" id="history-count">0</span>
                     </div>
                     <div class="history-panel-actions">
-                        <button class="history-panel-btn" onclick="qrGenerator.clearHistory()" title="Clear All">
+                        <button class="history-panel-btn" onclick="window.qrApp.clearHistory()" title="Clear All">
                             <i class="fas fa-trash"></i>
                         </button>
-                        <button class="history-panel-close" onclick="qrGenerator.toggleHistoryPanel()" title="Close">
+                        <button class="history-panel-close" onclick="window.qrApp.toggleHistoryPanel()" title="Close">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
@@ -49,11 +184,16 @@
                     <canvas id="header-qr" width="32" height="32"
                         title="Scan to visit coralgenz.wordpress.com"></canvas>
                     <span>GenZ QR</span>
-                    <!-- History Toggle Button - moved next to logo -->
-                    <button class="history-toggle-btn-header" id="history-toggle-btn"
-                        onclick="qrGenerator.toggleHistoryPanel()" title="View History">
+                    <!-- History Toggle Button -->
+                    <button class="history-toggle-btn-header" id="history-toggle-btn" onclick="toggleHistoryPanel()"
+                        title="View History">
                         <span class="history-btn-text">View History</span>
                         <span class="history-toggle-count" id="history-toggle-count">0</span>
+                    </button>
+                    <!-- Settings Gear Icon -->
+                    <button class="settings-gear-btn" id="settings-gear-btn" onclick="toggleSettingsPanel()"
+                        title="Settings">
+                        <i class="fas fa-cog"></i>
                     </button>
                 </div>
                 <div class="header-info">
@@ -84,109 +224,341 @@
                     </div>
                 </div>
 
-                <div class="type-grid">
-                    <div class="type-card" data-type="text">
-                        <div class="type-icon">
-                            <i class="fas fa-font"></i>
+                <!-- Search and Filter Controls -->
+                <div class="search-filter-section">
+                    <div class="search-container">
+                        <div class="search-input-wrapper">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="qr-search" class="search-input" placeholder="Search QR types..."
+                                autocomplete="off">
+                            <button class="clear-search" id="clear-search" style="display: none;">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
+                    </div>
+
+                    <div class="category-filter">
+                        <div class="filter-tabs">
+                            <button class="filter-tab active" data-category="all">
+                                <i class="fas fa-th"></i>
+                                <span>All</span>
+                            </button>
+                            <button class="filter-tab" data-category="essentials">
+                                <i class="fas fa-star"></i>
+                                <span>Essential</span>
+                            </button>
+                            <button class="filter-tab" data-category="identity">
+                                <i class="fas fa-id-card"></i>
+                                <span>Identity</span>
+                            </button>
+                            <button class="filter-tab" data-category="finance">
+                                <i class="fas fa-dollar-sign"></i>
+                                <span>Finance</span>
+                            </button>
+                            <button class="filter-tab" data-category="social">
+                                <i class="fas fa-share-alt"></i>
+                                <span>Social</span>
+                            </button>
+                            <button class="filter-tab" data-category="tech">
+                                <i class="fas fa-code"></i>
+                                <span>Tech</span>
+                            </button>
+                            <button class="filter-tab" data-category="lifestyle">
+                                <i class="fas fa-heart"></i>
+                                <span>Lifestyle</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="search-results-info" id="search-results-info" style="display: none;">
+                        <span id="results-count">0</span> results found
+                    </div>
+                </div>
+
+
+
+
+                <h2 class="sector-title" data-category="essentials">Essentials & Utilities</h2>
+                <div class="type-grid" data-category="essentials">
+                    <div class="type-card" data-type="text" data-keywords="text message plain simple basic">
+                        <div class="type-icon"><i class="fas fa-font"></i></div>
                         <h3>Text</h3>
-                        <p>Plain text or message</p>
+                        <p>Message block</p>
                     </div>
-
-                    <div class="type-card" data-type="url">
-                        <div class="type-icon">
-                            <i class="fas fa-link"></i>
-                        </div>
+                    <div class="type-card" data-type="url" data-keywords="website link url web site internet">
+                        <div class="type-icon"><i class="fas fa-link"></i></div>
                         <h3>Website</h3>
-                        <p>URL or web link</p>
+                        <p>Web link</p>
                     </div>
-
-                    <div class="type-card" data-type="contact">
-                        <div class="type-icon">
-                            <i class="fas fa-address-card"></i>
-                        </div>
-                        <h3>Contact</h3>
-                        <p>vCard contact info</p>
-                    </div>
-
-                    <div class="type-card" data-type="email">
-                        <div class="type-icon">
-                            <i class="fas fa-envelope"></i>
-                        </div>
-                        <h3>Email</h3>
-                        <p>Email address</p>
-                    </div>
-
-                    <div class="type-card" data-type="phone">
-                        <div class="type-icon">
-                            <i class="fas fa-phone"></i>
-                        </div>
+                    <div class="type-card" data-type="phone" data-keywords="phone call telephone number mobile">
+                        <div class="type-icon"><i class="fas fa-phone"></i></div>
                         <h3>Phone</h3>
-                        <p>Phone number</p>
+                        <p>Call number</p>
                     </div>
-
-                    <div class="type-card" data-type="wifi">
-                        <div class="type-icon">
-                            <i class="fas fa-wifi"></i>
-                        </div>
-                        <h3>WiFi</h3>
-                        <p>WiFi credentials</p>
-                    </div>
-
-                    <div class="type-card" data-type="location">
-                        <div class="type-icon">
-                            <i class="fas fa-map-marker-alt"></i>
-                        </div>
-                        <h3>Location</h3>
-                        <p>GPS coordinates</p>
-                    </div>
-
-                    <div class="type-card" data-type="sms">
-                        <div class="type-icon">
-                            <i class="fas fa-sms"></i>
-                        </div>
+                    <div class="type-card" data-type="sms" data-keywords="sms text message mobile phone">
+                        <div class="type-icon"><i class="fas fa-sms"></i></div>
                         <h3>SMS</h3>
                         <p>Text message</p>
                     </div>
-
-                    <div class="type-card" data-type="upi">
-                        <div class="type-icon">
-                            <i class="fas fa-rupee-sign"></i>
-                        </div>
-                        <h3>UPI Payment</h3>
-                        <p>GPay, Paytm, PhonePe</p>
+                    <div class="type-card" data-type="email" data-keywords="email mail message contact">
+                        <div class="type-icon"><i class="fas fa-envelope"></i></div>
+                        <h3>Email</h3>
+                        <p>Email format</p>
                     </div>
-
-                    <div class="type-card" data-type="social">
-                        <div class="type-icon">
-                            <i class="fas fa-share-alt"></i>
-                        </div>
-                        <h3>Social Media</h3>
-                        <p>Insta, FB, LinkedIn...</p>
+                    <div class="type-card" data-type="location" data-keywords="location gps coordinates map address">
+                        <div class="type-icon"><i class="fas fa-map-marker-alt"></i></div>
+                        <h3>Location</h3>
+                        <p>GPS coords</p>
                     </div>
-
-                    <div class="type-card" data-type="event">
-                        <div class="type-icon">
-                            <i class="fas fa-calendar-alt"></i>
-                        </div>
-                        <h3>Event/Booking</h3>
-                        <p>Calendar event</p>
+                    <div class="type-card" data-type="wifi" data-keywords="wifi wireless network internet connection">
+                        <div class="type-icon"><i class="fas fa-wifi"></i></div>
+                        <h3>WiFi</h3>
+                        <p>Network config</p>
                     </div>
-
-                    <div class="type-card" data-type="crypto">
-                        <div class="type-icon">
-                            <i class="fab fa-bitcoin"></i>
-                        </div>
-                        <h3>Crypto Payment</h3>
-                        <p>BTC, ETH, and more</p>
+                    <div class="type-card" data-type="prompt"
+                        data-keywords="ai prompt llm chatgpt artificial intelligence">
+                        <div class="type-icon"><i class="fas fa-robot"></i></div>
+                        <h3>AI Prompt</h3>
+                        <p>LLM prompt txt</p>
                     </div>
+                </div>
 
-                    <div class="type-card" data-type="barcode">
-                        <div class="type-icon">
-                            <i class="fas fa-barcode"></i>
-                        </div>
+                <h2 class="sector-title" data-category="identity">Identity & Contacts</h2>
+                <div class="type-grid" data-category="identity">
+                    <div class="type-card" data-type="contact" data-keywords="contact vcard business card info details">
+                        <div class="type-icon"><i class="fas fa-address-card"></i></div>
+                        <h3>vCard</h3>
+                        <p>Contact Info</p>
+                    </div>
+                    <div class="type-card" data-type="mecard" data-keywords="mecard contact business card simple">
+                        <div class="type-icon"><i class="fas fa-id-badge"></i></div>
+                        <h3>MeCard</h3>
+                        <p>Lite Contact</p>
+                    </div>
+                    <div class="type-card" data-type="linkedin"
+                        data-keywords="linkedin professional profile career job">
+                        <div class="type-icon"><i class="fab fa-linkedin"></i></div>
+                        <h3>LinkedIn Pro</h3>
+                        <p>Prof. Profile</p>
+                    </div>
+                    <div class="type-card" data-type="portfolio" data-keywords="portfolio cv resume website personal">
+                        <div class="type-icon"><i class="fas fa-briefcase"></i></div>
+                        <h3>Portfolio/CV</h3>
+                        <p>Work Showcase</p>
+                    </div>
+                    <div class="type-card" data-type="idcard" data-keywords="id card license registration member">
+                        <div class="type-icon"><i class="fas fa-id-card-alt"></i></div>
+                        <h3>Member ID</h3>
+                        <p>License/Reg</p>
+                    </div>
+                    <div class="type-card" data-type="medical" data-keywords="medical emergency health doctor hospital">
+                        <div class="type-icon"><i class="fas fa-user-md"></i></div>
+                        <h3>Medical</h3>
+                        <p>Emergency id</p>
+                    </div>
+                </div>
+
+                <h2 class="sector-title" data-category="finance">Finance & Business</h2>
+                <div class="type-grid" data-category="finance">
+                    <div class="type-card" data-type="paypal" data-keywords="paypal payment money transfer online">
+                        <div class="type-icon"><i class="fab fa-paypal"></i></div>
+                        <h3>PayPal</h3>
+                        <p>Payment</p>
+                    </div>
+                    <div class="type-card" data-type="upi" data-keywords="upi payment india rupee money transfer">
+                        <div class="type-icon"><i class="fas fa-rupee-sign"></i></div>
+                        <h3>UPI</h3>
+                        <p>App Payment</p>
+                    </div>
+                    <div class="type-card" data-type="crypto"
+                        data-keywords="crypto bitcoin wallet cryptocurrency blockchain">
+                        <div class="type-icon"><i class="fab fa-bitcoin"></i></div>
+                        <h3>Crypto</h3>
+                        <p>Wallet Address</p>
+                    </div>
+                    <div class="type-card" data-type="donate" data-keywords="donation patreon kofi support funding">
+                        <div class="type-icon"><i class="fas fa-hand-holding-heart"></i></div>
+                        <h3>Donation</h3>
+                        <p>Patreon/Kofi</p>
+                    </div>
+                    <div class="type-card" data-type="coupon" data-keywords="coupon promo discount deal offer">
+                        <div class="type-icon"><i class="fas fa-tag"></i></div>
+                        <h3>Coupon</h3>
+                        <p>Promo Deals</p>
+                    </div>
+                    <div class="type-card" data-type="barcode" data-keywords="barcode scanner format product code">
+                        <div class="type-icon"><i class="fas fa-barcode"></i></div>
                         <h3>Barcode</h3>
-                        <p>Product barcode</p>
+                        <p>Format scanner</p>
+                    </div>
+                </div>
+
+                <h2 class="sector-title" data-category="social">Comm & Social DeepLinks</h2>
+                <div class="type-grid" data-category="social">
+                    <div class="type-card" data-type="social"
+                        data-keywords="social media profile links instagram facebook">
+                        <div class="type-icon"><i class="fas fa-share-alt"></i></div>
+                        <h3>Social App</h3>
+                        <p>Profile links</p>
+                    </div>
+                    <div class="type-card" data-type="wa" data-keywords="whatsapp message chat direct communication">
+                        <div class="type-icon"><i class="fab fa-whatsapp"></i></div>
+                        <h3>WhatsApp</h3>
+                        <p>Direct Msg</p>
+                    </div>
+                    <div class="type-card" data-type="tg" data-keywords="telegram message chat direct communication">
+                        <div class="type-icon"><i class="fab fa-telegram"></i></div>
+                        <h3>Telegram</h3>
+                        <p>Direct Msg</p>
+                    </div>
+                    <div class="type-card" data-type="vb" data-keywords="viber message chat direct communication">
+                        <div class="type-icon"><i class="fab fa-viber"></i></div>
+                        <h3>Viber</h3>
+                        <p>Direct Msg</p>
+                    </div>
+                    <div class="type-card" data-type="sk" data-keywords="skype call video chat communication">
+                        <div class="type-icon"><i class="fab fa-skype"></i></div>
+                        <h3>Skype</h3>
+                        <p>Direct Call</p>
+                    </div>
+                    <div class="type-card" data-type="ft" data-keywords="facetime video call apple ios">
+                        <div class="type-icon"><i class="fas fa-video"></i></div>
+                        <h3>Facetime</h3>
+                        <p>Apple Video</p>
+                    </div>
+                    <div class="type-card" data-type="fta" data-keywords="facetime audio call apple ios voice">
+                        <div class="type-icon"><i class="fas fa-phone-alt"></i></div>
+                        <h3>Facetime Audio</h3>
+                        <p>Apple Voice</p>
+                    </div>
+                    <div class="type-card" data-type="discord" data-keywords="discord server gaming chat community">
+                        <div class="type-icon"><i class="fab fa-discord"></i></div>
+                        <h3>Discord</h3>
+                        <p>Server Link</p>
+                    </div>
+                    <div class="type-card" data-type="meeting" data-keywords="meeting conference call video standard">
+                        <div class="type-icon"><i class="fas fa-users"></i></div>
+                        <h3>Meetings</h3>
+                        <p>Standard links</p>
+                    </div>
+                    <div class="type-card" data-type="zm" data-keywords="zoom meeting video conference call">
+                        <div class="type-icon"><i class="fas fa-video"></i></div>
+                        <h3>Zoom App</h3>
+                        <p>Deep Link</p>
+                    </div>
+                    <div class="type-card" data-type="wx" data-keywords="webex meeting video conference call cisco">
+                        <div class="type-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                        <h3>Webex App</h3>
+                        <p>Deep Link</p>
+                    </div>
+                </div>
+
+                <h2 class="sector-title" data-category="tech">IT, Sec & Dev Ops</h2>
+                <div class="type-grid" data-category="tech">
+                    <div class="type-card" data-type="developer"
+                        data-keywords="code repository github gitlab development programming">
+                        <div class="type-icon"><i class="fas fa-code-branch"></i></div>
+                        <h3>Code Repos</h3>
+                        <p>Github/Gitlab</p>
+                    </div>
+                    <div class="type-card" data-type="sshkey" data-keywords="ssh key public security access developer">
+                        <div class="type-icon"><i class="fas fa-key"></i></div>
+                        <h3>SSH Key</h3>
+                        <p>Public Key</p>
+                    </div>
+                    <div class="type-card" data-type="docker" data-keywords="docker container image devops kubernetes">
+                        <div class="type-icon"><i class="fab fa-docker"></i></div>
+                        <h3>Docker Hub</h3>
+                        <p>Image Link</p>
+                    </div>
+                    <div class="type-card" data-type="serverinfo" data-keywords="server ip port ssh login credentials">
+                        <div class="type-icon"><i class="fas fa-server"></i></div>
+                        <h3>Server Details</h3>
+                        <p>IP & Port Info</p>
+                    </div>
+                    <div class="type-card" data-type="totp" data-keywords="totp 2fa authenticator security two factor">
+                        <div class="type-icon"><i class="fas fa-shield-alt"></i></div>
+                        <h3>Authenticator</h3>
+                        <p>2FA TOTP String</p>
+                    </div>
+                </div>
+
+                <h2 class="sector-title" data-category="lifestyle">Lifestyle, Media & App Search</h2>
+                <div class="type-grid" data-category="lifestyle">
+                    <div class="type-card" data-type="app" data-keywords="app bundle link generic application mobile">
+                        <div class="type-icon"><i class="fab fa-app-store"></i></div>
+                        <h3>App Bundle</h3>
+                        <p>Link Generics</p>
+                    </div>
+                    <div class="type-card" data-type="as" data-keywords="app store ios apple search find application">
+                        <div class="type-icon"><i class="fab fa-apple"></i></div>
+                        <h3>Find App (iOS)</h3>
+                        <p>AppStore Qry</p>
+                    </div>
+                    <div class="type-card" data-type="ps"
+                        data-keywords="play store android google search find application">
+                        <div class="type-icon"><i class="fab fa-google-play"></i></div>
+                        <h3>Find App (And)</h3>
+                        <p>PlayStore Qry</p>
+                    </div>
+                    <div class="type-card" data-type="yt" data-keywords="youtube video app deep link google">
+                        <div class="type-icon"><i class="fab fa-youtube"></i></div>
+                        <h3>YouTube App</h3>
+                        <p>Video Deep Link</p>
+                    </div>
+                    <div class="type-card" data-type="im" data-keywords="imdb movie app link film database">
+                        <div class="type-icon"><i class="fab fa-imdb"></i></div>
+                        <h3>IMDb App</h3>
+                        <p>Movie Link</p>
+                    </div>
+                    <div class="type-card" data-type="sp" data-keywords="spotify music track uri streaming audio">
+                        <div class="type-icon"><i class="fab fa-spotify"></i></div>
+                        <h3>Spotify App</h3>
+                        <p>Track URI</p>
+                    </div>
+                    <div class="type-card" data-type="maps"
+                        data-keywords="maps smart search generic location navigation">
+                        <div class="type-icon"><i class="fas fa-map-marked-alt"></i></div>
+                        <h3>Smart Maps</h3>
+                        <p>Search generic</p>
+                    </div>
+                    <div class="type-card" data-type="yl" data-keywords="yelp app business query restaurant review">
+                        <div class="type-icon"><i class="fab fa-yelp"></i></div>
+                        <h3>Yelp App</h3>
+                        <p>Business Qry</p>
+                    </div>
+                    <div class="type-card" data-type="fq" data-keywords="foursquare venue uri location check in">
+                        <div class="type-icon"><i class="fab fa-foursquare"></i></div>
+                        <h3>Foursquare</h3>
+                        <p>Venue URI</p>
+                    </div>
+                    <div class="type-card" data-type="uber"
+                        data-keywords="uber ride request target transportation taxi">
+                        <div class="type-icon"><i class="fab fa-uber"></i></div>
+                        <h3>Uber Ride</h3>
+                        <p>Request Target</p>
+                    </div>
+                    <div class="type-card" data-type="lyft"
+                        data-keywords="lyft ride request target transportation taxi">
+                        <div class="type-icon"><i class="fab fa-lyft"></i></div>
+                        <h3>Lyft Ride</h3>
+                        <p>Request Target</p>
+                    </div>
+                    <div class="type-card" data-type="event"
+                        data-keywords="event calendar file appointment meeting schedule">
+                        <div class="type-icon"><i class="fas fa-calendar-alt"></i></div>
+                        <h3>Event</h3>
+                        <p>Calendar file</p>
+                    </div>
+                    <div class="type-card" data-type="book" data-keywords="book isbn search library reading literature">
+                        <div class="type-icon"><i class="fas fa-book"></i></div>
+                        <h3>Book Check</h3>
+                        <p>ISBN Search</p>
+                    </div>
+                    <div class="type-card" data-type="secret" data-keywords="secret note hidden text private message">
+                        <div class="type-icon"><i class="fas fa-user-secret"></i></div>
+                        <h3>Secret Note</h3>
+                        <p>Hidden Text</p>
                     </div>
                 </div>
 
@@ -263,8 +635,8 @@
                     <div class="option-group" id="size-option-group">
                         <label>Quality</label>
                         <div class="size-slider">
-                            <input type="range" id="size-slider" min="500" max="3000" value="1000">
-                            <span id="size-value">1000px</span>
+                            <input type="range" id="size-slider" min="3000" max="8000" step="500" value="3000">
+                            <span id="size-value">3000px</span>
                         </div>
                     </div>
                 </div>
@@ -315,45 +687,49 @@
     <script src="script.js"></script>
     <script>
         // Global functions for button interactions
-        let qrGenerator;
-
         window.addEventListener('DOMContentLoaded', () => {
-            qrGenerator = new QRGeneratorPro();
+            // Instance is created in script.js
         });
 
         function goToPage(page) {
-            if (qrGenerator) {
-                qrGenerator.goToPage(page);
+            if (window.qrApp) {
+                window.qrApp.goToPage(page);
             }
         }
 
         function generateQR() {
-            if (qrGenerator) {
-                qrGenerator.generateQR();
+            if (window.qrApp) {
+                window.qrApp.generateQR();
             }
         }
 
         function downloadQR() {
-            if (qrGenerator) {
-                qrGenerator.downloadQR();
+            if (window.qrApp) {
+                window.qrApp.downloadQR();
             }
         }
 
         function shareQR() {
-            if (qrGenerator) {
-                qrGenerator.shareQR();
+            if (window.qrApp) {
+                window.qrApp.shareQR();
             }
         }
 
         function removeLogo() {
-            if (qrGenerator) {
-                qrGenerator.removeLogo();
+            if (window.qrApp) {
+                window.qrApp.removeLogo();
             }
         }
 
         function toggleHistoryPanel() {
-            if (qrGenerator) {
-                qrGenerator.toggleHistoryPanel();
+            if (window.qrApp) {
+                window.qrApp.toggleHistoryPanel();
+            }
+        }
+
+        function toggleSettingsPanel() {
+            if (window.qrApp) {
+                window.qrApp.toggleSettingsPanel();
             }
         }
     </script>
