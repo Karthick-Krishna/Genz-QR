@@ -41,7 +41,7 @@ class QRGeneratorPro {
             cornerStyle: 'default',
             fgColor: '#000000',
             bgColor: '#ffffff',
-            size: 400,
+            size: 3000,
             logo: null
         };
         this.history = this.loadHistory();
@@ -66,6 +66,9 @@ class QRGeneratorPro {
 
         // Initialize history panel
         this.loadHistoryDisplay();
+
+        // Initialize settings
+        this.initSettings();
 
         // Test QR library availability with delay to ensure DOM is ready
         setTimeout(() => {
@@ -222,6 +225,9 @@ class QRGeneratorPro {
             }, { passive: true });
         });
 
+        // Search and filter functionality
+        this.initSearchAndFilter();
+
         // Color inputs with debouncing
         let colorTimeout;
         const fgColorInput = document.getElementById('fg-color');
@@ -273,6 +279,14 @@ class QRGeneratorPro {
 
         // Optimize scroll performance
         this.optimizeScrolling();
+
+        // Responsive grid updates on window resize
+        window.addEventListener('resize', () => {
+            clearTimeout(this.resizeTimeout);
+            this.resizeTimeout = setTimeout(() => {
+                this.applyGridSettings();
+            }, 100);
+        }, { passive: true });
     }
 
     optimizeScrolling() {
@@ -287,6 +301,268 @@ class QRGeneratorPro {
         if ('ontouchstart' in window) {
             document.body.style.webkitOverflowScrolling = 'touch';
         }
+    }
+
+    initSearchAndFilter() {
+        // Define category mappings
+        this.categoryMappings = {
+            'essentials': ['text', 'url', 'phone', 'sms', 'email', 'location', 'wifi', 'prompt'],
+            'identity': ['contact', 'mecard', 'linkedin', 'portfolio', 'idcard', 'medical'],
+            'finance': ['paypal', 'upi', 'crypto', 'donate', 'coupon', 'barcode'],
+            'social': ['social', 'wa', 'tg', 'vb', 'sk', 'ft', 'fta', 'discord', 'meeting', 'zm', 'wx'],
+            'tech': ['developer', 'sshkey', 'docker', 'serverinfo', 'totp'],
+            'lifestyle': ['app', 'as', 'ps', 'yt', 'im', 'sp', 'maps', 'yl', 'fq', 'uber', 'lyft', 'event', 'book', 'secret']
+        };
+
+        // Define search keywords for each type
+        this.searchKeywords = {
+            'text': 'text message plain simple basic copy paste',
+            'url': 'website link url web site internet address domain',
+            'phone': 'phone call telephone number mobile cell dial',
+            'sms': 'sms text message mobile phone text chat',
+            'email': 'email mail message contact address send inbox',
+            'location': 'location gps coordinates map address latitude longitude',
+            'wifi': 'wifi wireless network internet connection password ssid wpa',
+            'prompt': 'ai prompt llm chatgpt artificial intelligence text query',
+            'contact': 'contact vcard business card info details address person name',
+            'mecard': 'mecard contact business card simple personal name info',
+            'linkedin': 'linkedin professional profile career job social network work resume link',
+            'portfolio': 'portfolio cv resume website personal projects showcase work',
+            'idcard': 'id card license registration member identity credential badge',
+            'medical': 'medical emergency health doctor hospital blood group condition allergy',
+            'paypal': 'paypal payment money transfer online cash invoice',
+            'upi': 'upi payment india rupee money transfer gpay paytm phonepe',
+            'crypto': 'crypto bitcoin wallet cryptocurrency blockchain eth btc sol usdt',
+            'donate': 'donation patreon kofi support funding charity help money',
+            'coupon': 'coupon promo discount deal offer save sale voucher',
+            'barcode': 'barcode scanner format product code ean upc 128 inventory',
+            'social': 'social media profile links instagram facebook twitter tiktok snapchat',
+            'wa': 'whatsapp message chat direct communication phone mobile',
+            'tg': 'telegram message chat direct communication username messenger',
+            'vb': 'viber message chat direct communication phone call messenger',
+            'sk': 'skype call video chat communication username voice',
+            'ft': 'facetime video call apple ios iphone ipad mac',
+            'fta': 'facetime audio call apple ios voice iphone ipad mac',
+            'discord': 'discord server gaming chat community invite channel',
+            'meeting': 'meeting conference call video standard teams meet zoom',
+            'zm': 'zoom meeting video conference call link online session',
+            'wx': 'webex meeting video conference call cisco remote work',
+            'developer': 'code repository github gitlab development programming git repo opensource',
+            'sshkey': 'ssh key public security access developer github server login rsa ed25519',
+            'docker': 'docker container image devops kubernetes virtualization hub containerization',
+            'serverinfo': 'server ip port ssh login credentials host remote machine',
+            'totp': 'totp 2fa authenticator security two factor auth code google authy',
+            'app': 'app bundle link generic application mobile store install download',
+            'as': 'app store ios apple search find application iphone ipad mac',
+            'ps': 'play store android google search find application mobile samsung',
+            'yt': 'youtube video app deep link google watch content channel playlist',
+            'im': 'imdb movie app link film database actor title cinema show',
+            'sp': 'spotify music track uri streaming audio playlist artist album song',
+            'maps': 'maps smart search generic location navigation direction driving find',
+            'yl': 'yelp app business query restaurant review local food services',
+            'fq': 'foursquare venue uri location check in local swarm',
+            'uber': 'uber ride request target transportation taxi drive travel trip',
+            'lyft': 'lyft ride request target transportation taxi drive travel trip',
+            'event': 'event calendar file appointment meeting schedule date time booking',
+            'book': 'book isbn search library reading literature author title volume',
+            'secret': 'secret note hidden text private message encrypted lock vault'
+        };
+
+        this.currentCategory = 'all';
+        this.currentSearchTerm = '';
+
+        // Bind search input
+        const searchInput = document.getElementById('qr-search');
+        const clearSearch = document.getElementById('clear-search');
+
+        if (searchInput) {
+            let searchTimeout;
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    this.handleSearch(e.target.value);
+                }, 200);
+            });
+
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    this.clearSearch();
+                }
+            });
+        }
+
+        if (clearSearch) {
+            clearSearch.addEventListener('click', () => {
+                this.clearSearch();
+            });
+        }
+
+        // Bind category filter tabs
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                this.handleCategoryFilter(tab.dataset.category);
+            });
+        });
+    }
+
+    handleSearch(searchTerm) {
+        this.currentSearchTerm = searchTerm.toLowerCase().trim();
+        const clearBtn = document.getElementById('clear-search');
+
+        if (this.currentSearchTerm) {
+            clearBtn.style.display = 'flex';
+        } else {
+            clearBtn.style.display = 'none';
+        }
+
+        this.filterContent();
+    }
+
+    clearSearch() {
+        const searchInput = document.getElementById('qr-search');
+        const clearBtn = document.getElementById('clear-search');
+
+        if (searchInput) searchInput.value = '';
+        if (clearBtn) clearBtn.style.display = 'none';
+
+        this.currentSearchTerm = '';
+        this.filterContent();
+
+        if (searchInput) searchInput.focus();
+    }
+
+    handleCategoryFilter(category) {
+        this.currentCategory = category;
+
+        // Update active tab
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.category === category);
+        });
+
+        this.filterContent();
+    }
+
+    filterContent() {
+        const allCards = document.querySelectorAll('.type-card');
+        const allSectors = document.querySelectorAll('.sector-title');
+        const allGrids = document.querySelectorAll('.type-grid');
+        const resultsInfo = document.getElementById('search-results-info');
+        const resultsCount = document.getElementById('results-count');
+
+        let visibleCount = 0;
+        let visibleSectors = new Set();
+
+        // Remove existing no-results message
+        const existingNoResults = document.querySelector('.no-results');
+        if (existingNoResults) {
+            existingNoResults.remove();
+        }
+
+        // Filter cards
+        allCards.forEach(card => {
+            const cardType = card.dataset.type;
+            const cardTitle = card.querySelector('h3')?.textContent || '';
+            const cardDesc = card.querySelector('p')?.textContent || '';
+            const cardKeywords = this.searchKeywords[cardType] || '';
+            const searchableText = `${cardTitle} ${cardDesc} ${cardKeywords}`.toLowerCase();
+
+            let matchesCategory = true;
+            let matchesSearch = true;
+
+            // Category filter
+            if (this.currentCategory !== 'all') {
+                const categoryTypes = this.categoryMappings[this.currentCategory] || [];
+                matchesCategory = categoryTypes.includes(cardType);
+            }
+
+            // Search filter
+            if (this.currentSearchTerm) {
+                matchesSearch = searchableText.includes(this.currentSearchTerm);
+            }
+
+            const shouldShow = matchesCategory && matchesSearch;
+
+            // Apply visibility
+            if (shouldShow) {
+                card.classList.remove('hidden');
+                card.classList.add('fade-in');
+                visibleCount++;
+
+                if (this.currentSearchTerm) {
+                    card.classList.add('search-highlight');
+                } else {
+                    card.classList.remove('search-highlight');
+                }
+
+                // Track which sector this card belongs to
+                const parentGrid = card.closest('.type-grid');
+                if (parentGrid) {
+                    const sectorCategory = parentGrid.dataset.category;
+                    if (sectorCategory) {
+                        visibleSectors.add(sectorCategory);
+                    }
+                    // Fallback to previous element if no data-category on grid
+                    const prevElem = parentGrid.previousElementSibling;
+                    if (prevElem && prevElem.classList.contains('sector-title')) {
+                        const sectorId = prevElem.dataset.category || prevElem.textContent.trim();
+                        visibleSectors.add(sectorId);
+                    }
+                }
+            } else {
+                card.classList.add('hidden');
+                card.classList.remove('fade-in', 'search-highlight');
+            }
+        });
+
+        // Show/hide sectors based on visible cards
+        allSectors.forEach(sector => {
+            const sectorId = sector.dataset.category || sector.textContent.trim();
+            if (visibleSectors.has(sectorId)) {
+                sector.classList.remove('hidden');
+            } else {
+                sector.classList.add('hidden');
+            }
+        });
+
+        // Show/hide grid containers
+        allGrids.forEach(grid => {
+            const hasVisibleChildren = Array.from(grid.children).some(child =>
+                !child.classList.contains('hidden')
+            );
+
+            if (hasVisibleChildren) {
+                grid.classList.remove('hidden');
+            } else {
+                grid.classList.add('hidden');
+            }
+        });
+
+        // Update results info
+        if (resultsInfo && resultsCount) {
+            if (this.currentSearchTerm || this.currentCategory !== 'all') {
+                resultsInfo.style.display = 'flex';
+                resultsCount.textContent = visibleCount;
+            } else {
+                resultsInfo.style.display = 'none';
+            }
+        }
+
+        // Show no results message
+        if (visibleCount === 0 && (this.currentSearchTerm || this.currentCategory !== 'all')) {
+            this.showNoResults();
+        }
+    }
+
+    showNoResults() {
+        const pageContent = document.querySelector('#page-1 .page-content');
+        const noResults = document.createElement('div');
+        noResults.className = 'no-results';
+        noResults.innerHTML = `
+            <i class="fas fa-search"></i>
+            <h3>No QR types found</h3>
+            <p>Try adjusting your search terms or selecting a different category</p>
+        `;
+        pageContent.appendChild(noResults);
     }
 
     selectType(type) {
@@ -605,7 +881,7 @@ class QRGeneratorPro {
                 html = `
                     <div class="form-group">
                         <label for="social-platform">Platform *</label>
-                        <select id="social-platform" class="form-input" onchange="qrGenerator.updateSocialHint()">
+                        <select id="social-platform" class="form-input" onchange="window.qrApp.updateSocialHint()">
                             <option value="instagram">Instagram</option>
                             <option value="facebook">Facebook</option>
                             <option value="twitter">X (Twitter)</option>
@@ -623,61 +899,6 @@ class QRGeneratorPro {
                         <label for="social-input">Username / Handle *</label>
                         <input type="text" id="social-input" class="form-input" placeholder="username" required>
                         <small id="social-hint" style="margin-top:5px; display:block; color:#718096; font-size:12px;">Enter your Instagram username (without @)</small>
-                    </div>
-                `;
-                break;
-
-            case 'bank':
-                title.textContent = 'Bank Transfer';
-                subtitle.textContent = 'Account transfer details';
-                html = `
-                    <div class="form-group">
-                        <label for="bank-region">Region</label>
-                        <select id="bank-region" class="form-input" onchange="qrGenerator.updateBankFields()">
-                            <option value="india">India (IFSC)</option>
-                            <option value="international">International (SWIFT)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="bank-name">Bank Name *</label>
-                        <select id="bank-name" class="form-input">
-                            <option value="">Select Bank</option>
-                            <option value="sbi">State Bank of India</option>
-                            <option value="hdfc">HDFC Bank</option>
-                            <option value="icici">ICICI Bank</option>
-                            <option value="axis">Axis Bank</option>
-                            <option value="kotak">Kotak Mahindra</option>
-                            <option value="pnb">Punjab National Bank</option>
-                            <option value="bob">Bank of Baroda</option>
-                            <option value="canara">Canara Bank</option>
-                            <option value="union">Union Bank</option>
-                            <option value="idbi">IDBI Bank</option>
-                            <option value="yes">Yes Bank</option>
-                            <option value="indusind">IndusInd Bank</option>
-                            <option value="federal">Federal Bank</option>
-                            <option value="rbl">RBL Bank</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="bank-beneficiary">Beneficiary Name *</label>
-                        <input type="text" id="bank-beneficiary" class="form-input" placeholder="Account holder name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="bank-account">Account Number *</label>
-                        <input type="text" id="bank-account" class="form-input" placeholder="1234567890" required>
-                    </div>
-                    <div class="form-group" id="bank-ifsc-group">
-                        <label for="bank-ifsc">IFSC Code *</label>
-                        <input type="text" id="bank-ifsc" class="form-input" placeholder="SBIN0001234" maxlength="11">
-                    </div>
-                    <div class="form-group" id="bank-swift-group" style="display:none;">
-                        <label for="bank-swift">SWIFT/BIC Code</label>
-                        <input type="text" id="bank-swift" class="form-input" placeholder="SBININBBXXX" maxlength="11">
-                    </div>
-                    <div class="form-group">
-                        <label for="bank-amount">Amount</label>
-                        <input type="number" id="bank-amount" class="form-input" placeholder="1000.00" min="1" step="0.01">
                     </div>
                 `;
                 break;
@@ -737,7 +958,7 @@ class QRGeneratorPro {
                 html = `
                     <div class="form-group">
                         <label for="crypto-coin">Cryptocurrency *</label>
-                        <select id="crypto-coin" class="form-input" onchange="qrGenerator.updateCryptoFields()">
+                        <select id="crypto-coin" class="form-input" onchange="window.qrApp.updateCryptoFields()">
                             <option value="bitcoin">Bitcoin (BTC)</option>
                             <option value="ethereum">Ethereum (ETH)</option>
                             <option value="litecoin">Litecoin (LTC)</option>
@@ -805,8 +1026,415 @@ class QRGeneratorPro {
                     </div>
                 `;
                 break;
-        }
 
+            case 'developer':
+                title.textContent = 'Developer Repos';
+                subtitle.textContent = 'GitHub or GitLab Project';
+                html = `
+                    <div class="form-group">
+                        <label for="dev-platform">Platform *</label>
+                        <select id="dev-platform" class="form-input">
+                            <option value="github">GitHub</option>
+                            <option value="gitlab">GitLab</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="dev-user">Username / Org *</label>
+                        <input type="text" id="dev-user" class="form-input" placeholder="google" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="dev-repo">Repository Name *</label>
+                        <input type="text" id="dev-repo" class="form-input" placeholder="material-design" required>
+                    </div>
+                `;
+                break;
+
+            case 'maps':
+                title.textContent = 'Smart Navigation';
+                subtitle.textContent = 'Google Maps or Waze';
+                html = `
+                    <div class="form-group">
+                        <label for="map-platform">App *</label>
+                        <select id="map-platform" class="form-input">
+                            <option value="google">Google Maps Search</option>
+                            <option value="waze">Waze Navigation</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="map-query">Location / Search Query *</label>
+                        <input type="text" id="map-query" class="form-input" placeholder="Eiffel Tower or Address" required>
+                    </div>
+                `;
+                break;
+
+            case 'app':
+                title.textContent = 'Smart Apps';
+                subtitle.textContent = 'iOS & Android deep links';
+                html = `
+                    <div class="form-group">
+                        <label for="app-platform">Target Platform *</label>
+                        <select id="app-platform" class="form-input">
+                            <option value="ios">Apple App Store (Bundle ID)</option>
+                            <option value="android">Google Play Store (Package Name)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="app-id">App ID / Package *</label>
+                        <input type="text" id="app-id" class="form-input" placeholder="com.example.app" required>
+                    </div>
+                `;
+                break;
+
+            case 'meeting':
+                title.textContent = 'Meetings';
+                subtitle.textContent = 'Zoom, Meet, or Teams ID';
+                html = `
+                    <div class="form-group">
+                        <label for="meeting-platform">App *</label>
+                        <select id="meeting-platform" class="form-input">
+                            <option value="zoom">Zoom</option>
+                            <option value="meet">Google Meet</option>
+                            <option value="teams">Microsoft Teams</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="meeting-id">Meeting ID / Code *</label>
+                        <input type="text" id="meeting-id" class="form-input" placeholder="Enter ID or link" required>
+                    </div>
+                `;
+                break;
+
+            case 'paypal':
+                title.textContent = 'PayPal Pay';
+                subtitle.textContent = 'Invoices & payment links';
+                html = `
+                    <div class="form-group">
+                        <label for="paypal-user">PayPal.me Username *</label>
+                        <input type="text" id="paypal-user" class="form-input" placeholder="johndoe" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="paypal-amount">Amount (Optional)</label>
+                        <input type="number" id="paypal-amount" class="form-input" placeholder="0.00" step="0.01">
+                    </div>
+                `;
+                break;
+
+            case 'medical':
+                title.textContent = 'Medical Info';
+                subtitle.textContent = 'Emergency medical card';
+                html = `
+                    <div class="form-group">
+                        <label for="medical-name">Full Name *</label>
+                        <input type="text" id="medical-name" class="form-input" placeholder="John Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="medical-blood">Blood Type</label>
+                        <input type="text" id="medical-blood" class="form-input" placeholder="O+">
+                    </div>
+                    <div class="form-group">
+                        <label for="medical-conditions">Conditions / Allergies</label>
+                        <textarea id="medical-conditions" class="form-input" rows="3" placeholder="Diabetes, Penicillin allergy..."></textarea>
+                    </div>
+                `;
+                break;
+
+            case 'donate':
+                title.textContent = 'Donation Link';
+                subtitle.textContent = 'Patreon, Kofi, or Tip';
+                html = `
+                    <div class="form-group">
+                        <label for="donate-platform">Platform *</label>
+                        <select id="donate-platform" class="form-input">
+                            <option value="patreon">Patreon</option>
+                            <option value="kofi">Ko-fi</option>
+                            <option value="coffee">Buy Me A Coffee</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="donate-user">Username *</label>
+                        <input type="text" id="donate-user" class="form-input" placeholder="username" required>
+                    </div>
+                `;
+                break;
+
+            case 'discord':
+                title.textContent = 'Discord';
+                subtitle.textContent = 'Server or Profile';
+                html = `
+                    <div class="form-group">
+                        <label for="discord-id">Invite Link / Username *</label>
+                        <input type="text" id="discord-id" class="form-input" placeholder="discord.gg/invitelink" required>
+                    </div>
+                `;
+                break;
+
+            case 'book':
+                title.textContent = 'Book Search';
+                subtitle.textContent = 'Search by ISBN or Title';
+                html = `
+                    <div class="form-group">
+                        <label for="book-query">ISBN or Title *</label>
+                        <input type="text" id="book-query" class="form-input" placeholder="978-0123..." required>
+                    </div>
+                `;
+                break;
+
+            case 'coupon':
+                title.textContent = 'Coupon Card';
+                subtitle.textContent = 'Deals & Expiry info';
+                html = `
+                    <div class="form-group">
+                        <label for="coupon-code">Promo Code *</label>
+                        <input type="text" id="coupon-code" class="form-input" placeholder="SAVE50" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="coupon-desc">Deal Description</label>
+                        <input type="text" id="coupon-desc" class="form-input" placeholder="50% off select items">
+                    </div>
+                `;
+                break;
+
+            case 'secret':
+                title.textContent = 'Secret Note';
+                subtitle.textContent = 'Hidden secure message';
+                html = `
+                    <div class="form-group">
+                        <label for="secret-msg">Your Message *</label>
+                        <textarea id="secret-msg" class="form-input" rows="4" placeholder="Enter private note..." required></textarea>
+                    </div>
+                `;
+                break;
+
+            case 'sp':
+                title.textContent = 'Spotify Smart Link';
+                subtitle.textContent = 'Tracks, Albums, Artists or Playlists';
+                html = `
+                    <div class="form-group">
+                        <label for="sp-type">Target Type</label>
+                        <select id="sp-type" class="form-input">
+                            <option value="track">Track (ID)</option>
+                            <option value="artist">Artist (ID)</option>
+                            <option value="album">Album (ID)</option>
+                            <option value="playlist">Playlist (ID)</option>
+                            <option value="search">Search Keywords</option>
+                            <option value="custom">Custom Spotify URI</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sp-id">ID / Keywords / URI *</label>
+                        <input type="text" id="sp-id" class="form-input" placeholder="e.g. 40960..." required>
+                    </div>`;
+                break;
+
+            case 'yt':
+                title.textContent = 'YouTube Content';
+                subtitle.textContent = 'Videos, Channels or Playlists';
+                html = `
+                    <div class="form-group">
+                        <label for="yt-type">Target Type</label>
+                        <select id="yt-type" class="form-input">
+                            <option value="video">Video (ID)</option>
+                            <option value="channel">Channel (ID/Handle)</option>
+                            <option value="playlist">Playlist (ID)</option>
+                            <option value="search">Search Keywords</option>
+                            <option value="custom">Custom YouTube Link</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="yt-id">ID / Keywords / Link *</label>
+                        <input type="text" id="yt-id" class="form-input" placeholder="e.g. dQw4w9..." required>
+                    </div>`;
+                break;
+
+            case 'im':
+                title.textContent = 'IMDb Encyclopedia';
+                subtitle.textContent = 'Bio, Movies, or TV Shows';
+                html = `
+                    <div class="form-group">
+                        <label for="im-type">Link Type</label>
+                        <select id="im-type" class="form-input">
+                            <option value="title">Movie / TV Title (tt...)</option>
+                            <option value="name">Name / Actor / Crew (nm...)</option>
+                            <option value="company">Production Company (co...)</option>
+                            <option value="search">Search Query</option>
+                            <option value="custom">Direct IMDb URL</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="im-id">ID / Query / URL *</label>
+                        <input type="text" id="im-id" class="form-input" placeholder="e.g. tt1234567" required>
+                    </div>`;
+                break;
+
+            case 'wa': case 'tg': case 'vb': case 'sk': case 'ft': case 'fta': case 'zm': case 'wx': case 'yl': case 'fq': case 'as': case 'ps':
+                const deepMap = {
+                    wa: { t: 'WhatsApp Deep Link', s: 'Phone Number', ph: '1234567890' },
+                    tg: { t: 'Telegram Message', s: 'Username', ph: 'username' },
+                    vb: { t: 'Viber Connect', s: 'Phone Number', ph: '1234567890' },
+                    sk: { t: 'Skype Link', s: 'Skype Username', ph: 'user123' },
+                    ft: { t: 'Facetime Video', s: 'Apple ID / Phone', ph: 'user@icloud.com' },
+                    fta: { t: 'Facetime Audio', s: 'Apple ID / Phone', ph: 'user@icloud.com' },
+                    zm: { t: 'Zoom Deep Link', s: 'Meeting ID', ph: '123456789' },
+                    wx: { t: 'Webex Deep Link', s: 'Meeting ID', ph: '123456789' },
+                    yl: { t: 'Yelp Place Link', s: 'Business ID', ph: 'biz-id' },
+                    fq: { t: 'Foursquare Link', s: 'Venue ID', ph: 'venue-id' },
+                    as: { t: 'App Store Search', s: 'Search Query', ph: 'Game name' },
+                    ps: { t: 'Play Store Search', s: 'Search Query', ph: 'Game name' }
+                };
+                const info = deepMap[this.selectedType];
+                title.textContent = info.t;
+                subtitle.textContent = "Direct mobile app open link";
+                html = `
+                    <div class="form-group">
+                        <label for="${this.selectedType}-id">${info.s} *</label>
+                        <input type="text" id="${this.selectedType}-id" class="form-input" placeholder="${info.ph}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="${this.selectedType}-custom">Or Custom URI (Optional)</label>
+                        <input type="text" id="${this.selectedType}-custom" class="form-input" placeholder="protocol://full/path">
+                    </div>`;
+                break;
+
+                break;
+
+            case 'prompt':
+                const dataMap = {
+                    prompt: { t: 'AI Text Prompt', s: 'You are a helpful...' }
+                };
+                title.textContent = dataMap[this.selectedType].t;
+                subtitle.textContent = 'Multi-line structured text output';
+                html = `
+                    <div class="form-group">
+                        <label for="${this.selectedType}-data">Raw Data *</label>
+                        <textarea id="${this.selectedType}-data" class="form-input" rows="5" placeholder="Enter ${dataMap[this.selectedType].s}..." required></textarea>
+                    </div>`;
+                break;
+
+            case 'totp':
+                title.textContent = 'Authenticator 2FA';
+                subtitle.textContent = 'TOTP Secret Code';
+                html = `
+                    <div class="form-group">
+                        <label for="totp-account">Account / Email *</label>
+                        <input type="text" id="totp-account" class="form-input" placeholder="user@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="totp-issuer">Issuer / App Name *</label>
+                        <input type="text" id="totp-issuer" class="form-input" placeholder="My Enterprise App" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="totp-secret">Base32 Secret Key *</label>
+                        <input type="text" id="totp-secret" class="form-input" placeholder="JBSWY3DPEHPK3PXP" required>
+                    </div>`;
+                break;
+
+            case 'uber': case 'lyft':
+                title.textContent = this.selectedType === 'uber' ? 'Uber Ride Request' : 'Lyft Ride Request';
+                subtitle.textContent = 'Set pickup/dropoff coordinates';
+                html = `
+                    <div class="form-group">
+                        <label for="${this.selectedType}-lat">Dropoff Latitude *</label>
+                        <input type="text" id="${this.selectedType}-lat" class="form-input" placeholder="37.7749" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="${this.selectedType}-lng">Dropoff Longitude *</label>
+                        <input type="text" id="${this.selectedType}-lng" class="form-input" placeholder="-122.4194" required>
+                    </div>`;
+                break;
+            case 'mecard':
+                title.textContent = 'MeCard Lite';
+                subtitle.textContent = 'Simplified contact format';
+                html = `
+                    <div class="form-group">
+                        <label for="mecard-name">Full Name *</label>
+                        <input type="text" id="mecard-name" class="form-input" placeholder="John Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mecard-phone">Phone Number</label>
+                        <input type="tel" id="mecard-phone" class="form-input" placeholder="+1234567890">
+                    </div>
+                    <div class="form-group">
+                        <label for="mecard-email">Email</label>
+                        <input type="email" id="mecard-email" class="form-input" placeholder="john@example.com">
+                    </div>`;
+                break;
+            case 'linkedin':
+                title.textContent = 'LinkedIn Pro';
+                subtitle.textContent = 'Direct professional profile link';
+                html = `
+                    <div class="form-group">
+                        <label for="linkedin-user">Profile URL or Username *</label>
+                        <input type="text" id="linkedin-user" class="form-input" placeholder="linkedin.com/in/username" required>
+                    </div>`;
+                break;
+            case 'portfolio':
+                title.textContent = 'Portfolio/CV';
+                subtitle.textContent = 'Personal showcase link';
+                html = `
+                    <div class="form-group">
+                        <label for="portfolio-url">Website/Document URL *</label>
+                        <input type="url" id="portfolio-url" class="form-input" placeholder="https://mywork.com/resume" required>
+                    </div>`;
+                break;
+            case 'idcard':
+                title.textContent = 'Member ID';
+                subtitle.textContent = 'License or Registration Details';
+                html = `
+                    <div class="form-group">
+                        <label for="id-type">Credential Type *</label>
+                        <input type="text" id="id-type" class="form-input" placeholder="Membership / Employee ID" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="id-number">ID Number *</label>
+                        <input type="text" id="id-number" class="form-input" placeholder="EX-123456" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="id-issued">Issuing Body</label>
+                        <input type="text" id="id-issued" class="form-input" placeholder="Organization / Board">
+                    </div>`;
+                break;
+            case 'sshkey':
+                title.textContent = 'SSH Public Key';
+                subtitle.textContent = 'Encode your public key for sharing';
+                html = `
+                    <div class="form-group">
+                        <label for="ssh-key">Public Key Data *</label>
+                        <textarea id="ssh-key" class="form-input" rows="4" placeholder="ssh-rsa AAAAB3N..." required></textarea>
+                    </div>`;
+                break;
+            case 'docker':
+                title.textContent = 'Docker Hub';
+                subtitle.textContent = 'Direct image link';
+                html = `
+                    <div class="form-group">
+                        <label for="docker-image">Image Name / Path *</label>
+                        <input type="text" id="docker-image" class="form-input" placeholder="nginx:latest or user/repo:v1" required>
+                    </div>`;
+                break;
+            case 'serverinfo':
+                title.textContent = 'Server Details';
+                subtitle.textContent = 'IP, Port and Protocol info';
+                html = `
+                    <div class="form-group">
+                        <label for="srv-ip">Server Address (IP/Domain) *</label>
+                        <input type="text" id="srv-ip" class="form-input" placeholder="192.168.1.10" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="srv-port">Port Number</label>
+                        <input type="number" id="srv-port" class="form-input" placeholder="22">
+                    </div>
+                    <div class="form-group">
+                        <label for="srv-protocol">Protocol</label>
+                        <select id="srv-protocol" class="form-input">
+                            <option value="ssh">SSH</option>
+                            <option value="ftp">FTP</option>
+                            <option value="http">HTTP</option>
+                            <option value="https">HTTPS</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                    </div>`;
+                break;
+        }
         container.innerHTML = html;
 
         // Bind event listeners for barcode height slider
@@ -855,8 +1483,8 @@ class QRGeneratorPro {
                 return this.generateMailto();
 
             case 'phone':
-                const phone = document.getElementById('phone-input').value.trim();
-                return phone ? `tel:${phone}` : '';
+                const phoneInput = document.getElementById('phone-input').value.trim();
+                return phoneInput ? `tel:${phoneInput}` : '';
 
             case 'wifi':
                 return this.generateWiFi();
@@ -865,16 +1493,15 @@ class QRGeneratorPro {
                 return this.generateLocation();
 
             case 'sms':
-                return this.generateSMS();
-
-            case 'upi':
-                return this.generateUPI();
+                const smsPhone = document.getElementById('sms-phone').value.trim();
+                const smsMsg = document.getElementById('sms-message').value.trim();
+                return smsPhone ? `smsto:${smsPhone}:${smsMsg}` : '';
 
             case 'social':
                 return this.generateSocial();
 
-            case 'bank':
-                return this.generateBank();
+            case 'upi':
+                return this.generateUPI();
 
             case 'event':
                 return this.generateEvent();
@@ -885,9 +1512,158 @@ class QRGeneratorPro {
             case 'barcode':
                 return this.generateBarcode();
 
+            case 'developer':
+                const devPlat = document.getElementById('dev-platform').value;
+                const devUser = document.getElementById('dev-user').value.trim();
+                const devRepo = document.getElementById('dev-repo').value.trim();
+                if (devPlat === 'github') return `https://github.com/${devUser}/${devRepo}`;
+                if (devPlat === 'gitlab') return `https://gitlab.com/${devUser}/${devRepo}`;
+                return '';
+
+            case 'maps':
+                const mapPlat = document.getElementById('map-platform').value;
+                const mapQue = document.getElementById('map-query').value.trim();
+                if (mapPlat === 'google') return `https://www.google.com/maps/search/${encodeURIComponent(mapQue)}`;
+                if (mapPlat === 'waze') return `https://waze.com/ul?q=${encodeURIComponent(mapQue)}&navigate=yes`;
+                return '';
+
+            case 'app':
+                const apPlat = document.getElementById('app-platform').value;
+                const apId = document.getElementById('app-id').value.trim();
+                if (apPlat === 'ios') return `https://apps.apple.com/app/id${apId}`;
+                if (apPlat === 'android') return `https://play.google.com/store/apps/details?id=${apId}`;
+                return '';
+
+            case 'meeting':
+                return this.generateMeeting();
+
+            case 'paypal':
+                return this.generatePayPal();
+
+            case 'medical':
+                return this.generateMedical();
+
+            case 'donate':
+                const donPlat = document.getElementById('donate-platform').value;
+                const donUser = document.getElementById('donate-user').value.trim();
+                if (donPlat === 'patreon') return `https://www.patreon.com/${donUser}`;
+                if (donPlat === 'kofi') return `https://ko-fi.com/${donUser}`;
+                if (donPlat === 'coffee') return `https://www.buymeacoffee.com/${donUser}`;
+                return donUser;
+
+            case 'discord':
+                const discId = document.getElementById('discord-id').value.trim();
+                return discId.startsWith('http') ? discId : `https://discord.gg/${discId}`;
+
+                break;
+
+            case 'book':
+                const bkQuery = document.getElementById('book-query').value.trim();
+                return `https://isbnsearch.org/search?s=${encodeURIComponent(bkQuery)}`;
+
+            case 'coupon':
+                const copCode = document.getElementById('coupon-code').value.trim();
+                const copDesc = document.getElementById('coupon-desc').value.trim();
+                return `COUPON CODE: ${copCode}\nDeal: ${copDesc}`;
+
+            case 'secret':
+                return document.getElementById('secret-msg').value.trim();
+
+            case 'wa': case 'tg': case 'vb': case 'sk': case 'ft': case 'fta': case 'zm': case 'wx': case 'yl': case 'fq': case 'as': case 'ps':
+                const customUri = document.getElementById(this.selectedType + '-custom').value;
+                if (customUri) return customUri;
+
+                const idInput = document.getElementById(this.selectedType + '-id').value;
+                switch (this.selectedType) {
+                    case 'wa': return 'whatsapp://send?phone=' + idInput;
+                    case 'tg': return 'tg://resolve?domain=' + idInput;
+                    case 'vb': return 'viber://contact?number=' + idInput;
+                    case 'sk': return 'skype:' + idInput + '?call';
+                    case 'ft': return 'facetime:' + idInput;
+                    case 'fta': return 'facetime-audio:' + idInput;
+                    case 'zm': return 'zoommtg://zoom.us/join?confno=' + idInput;
+                    case 'wx': return 'wbx://meet/' + idInput;
+                    case 'yl': return 'yelp:///biz/' + idInput;
+                    case 'fq': return 'foursquare://venues/' + idInput;
+                    case 'as': return 'itms-apps://search.itunes.apple.com/WebObjects/MZSearch.woa/wa/search?term=' + encodeURIComponent(idInput);
+                    case 'ps': return 'market://search?q=' + encodeURIComponent(idInput);
+                    default: return '';
+                }
+
+            case 'sp':
+                const spType = document.getElementById('sp-type').value;
+                const spId = document.getElementById('sp-id').value.trim();
+                if (spType === 'custom') return spId;
+                if (spType === 'search') return 'spotify:search:' + encodeURIComponent(spId);
+                return `spotify:${spType}:${spId}`;
+
+            case 'yt':
+                const ytType = document.getElementById('yt-type').value;
+                const ytId = document.getElementById('yt-id').value.trim();
+                if (ytType === 'custom') return ytId;
+                if (ytType === 'video') return 'vnd.youtube://' + ytId;
+                if (ytType === 'channel') return 'vnd.youtube://channel/' + ytId;
+                if (ytType === 'playlist') return 'https://youtube.com/playlist?list=' + ytId;
+                if (ytType === 'search') return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(ytId);
+                return ytId;
+
+            case 'im':
+                const imType = document.getElementById('im-type').value;
+                const imId = document.getElementById('im-id').value.trim();
+                if (imType === 'custom') return imId;
+                if (imType === 'search') return 'https://www.imdb.com/find?q=' + encodeURIComponent(imId);
+                return `imdb:///title/${imId}/`.replace('title', imType);
+            case 'prompt':
+                return document.getElementById(this.selectedType + '-data').value;
+            case 'totp':
+                return `otpauth://totp/${encodeURIComponent(document.getElementById('totp-issuer').value)}:${encodeURIComponent(document.getElementById('totp-account').value)}?secret=${document.getElementById('totp-secret').value}&issuer=${encodeURIComponent(document.getElementById('totp-issuer').value)}`;
+            case 'uber': return 'uber://?action=setPickup&dropoff[latitude]=' + document.getElementById('uber-lat').value + '&dropoff[longitude]=' + document.getElementById('uber-lng').value;
+            case 'lyft': return 'lyft://ridetype?id=lyft&destination[latitude]=' + document.getElementById('lyft-lat').value + '&destination[longitude]=' + document.getElementById('lyft-lng').value;
+            case 'mecard':
+                return this.generateMeCard();
+            case 'linkedin':
+                let liUrl = document.getElementById('linkedin-user').value.trim();
+                if (!liUrl.startsWith('http')) {
+                    if (liUrl.includes('linkedin.com')) liUrl = 'https://' + liUrl;
+                    else liUrl = 'https://www.linkedin.com/in/' + liUrl;
+                }
+                return liUrl;
+            case 'portfolio':
+                return document.getElementById('portfolio-url').value.trim();
+            case 'idcard':
+                const idT = document.getElementById('id-type').value.trim();
+                const idN = document.getElementById('id-number').value.trim();
+                const idI = document.getElementById('id-issued').value.trim();
+                return `ID Type: ${idT}\nID Number: ${idN}\nIssued By: ${idI}`;
+            case 'sshkey':
+                return document.getElementById('ssh-key').value.trim();
+            case 'docker':
+                const img = document.getElementById('docker-image').value.trim();
+                return img.startsWith('http') ? img : `https://hub.docker.com/r/${img.includes('/') ? img : '_/' + img}`;
+            case 'serverinfo':
+                const sip = document.getElementById('srv-ip').value.trim();
+                const spr = document.getElementById('srv-port').value.trim();
+                const spro = document.getElementById('srv-protocol').value;
+                return `${spro}://${sip}${spr ? ':' + spr : ''}`;
             default:
                 return '';
         }
+    }
+
+    generateMeCard() {
+        const name = document.getElementById('mecard-name').value.trim();
+        const phone = document.getElementById('mecard-phone').value.trim();
+        const email = document.getElementById('mecard-email').value.trim();
+
+        if (!name) return '';
+
+        // MECARD:N:Doe,John;TEL:123456789;EMAIL:john@doe.com;;
+        let mecard = 'MECARD:';
+        mecard += `N:${name};`;
+        if (phone) mecard += `TEL:${phone};`;
+        if (email) mecard += `EMAIL:${email};`;
+        mecard += ';';
+        return mecard;
     }
 
     generateVCard() {
@@ -1300,6 +2076,81 @@ class QRGeneratorPro {
         return data;
     }
 
+    generatePDF() {
+        const url = document.getElementById('pdf-url').value.trim();
+        if (!url) return '';
+        return url.startsWith('http') ? url : `https://${url}`;
+    }
+
+    generateApp() {
+        const url = document.getElementById('app-url').value.trim();
+        if (!url) return '';
+        return url;
+    }
+
+    generateMeeting() {
+        const platform = document.getElementById('meeting-platform').value;
+        const id = document.getElementById('meeting-id').value.trim();
+
+        if (!id) return '';
+
+        if (id.startsWith('http')) return id;
+
+        // Basic URL constructions if only ID is provided
+        switch (platform) {
+            case 'zoom': return `https://zoom.us/j/${id}`;
+            case 'meet': return `https://meet.google.com/${id}`;
+            case 'teams': return id; // Teams links are too complex to construct from ID
+            default: return id;
+        }
+    }
+
+    generateMusic() {
+        const url = document.getElementById('music-url').value.trim();
+        if (!url) return '';
+        return url;
+    }
+
+    generatePayPal() {
+        const user = document.getElementById('paypal-user').value.trim();
+        const amount = document.getElementById('paypal-amount').value.trim();
+
+        if (!user) return '';
+
+        // PayPal.me format is cleaner for QR codes
+        if (amount) {
+            return `https://www.paypal.com/paypalme/${user}/${amount}`;
+        }
+        return `https://www.paypal.com/paypalme/${user}`;
+    }
+
+    generateDonate() {
+        const platform = document.getElementById('donate-platform').value;
+        const user = document.getElementById('donate-user').value.trim();
+        if (!user) return '';
+
+        switch (platform) {
+            case 'coffee': return `https://www.buymeacoffee.com/${user}`;
+            case 'patreon': return `https://www.patreon.com/${user}`;
+            case 'kofi': return `https://ko-fi.com/${user}`;
+            default: return user;
+        }
+    }
+
+    generateMedical() {
+        const name = document.getElementById('medical-name').value.trim();
+        const blood = document.getElementById('medical-blood').value.trim();
+        const conditions = document.getElementById('medical-conditions').value.trim();
+
+        if (!name) return '';
+
+        let info = `MEDICAL EMERGENCY INFO\nName: ${name}`;
+        if (blood) info += `\nBlood Type: ${blood}`;
+        if (conditions) info += `\nConditions: ${conditions}`;
+
+        return info;
+    }
+
     // History Management
     loadHistory() {
         try {
@@ -1328,24 +2179,62 @@ class QRGeneratorPro {
                 const ssidMatch = this.qrData.match(/S:([^;]+)/);
                 return ssidMatch ? ssidMatch[1] : 'WiFi Network';
             case 'location':
-                const coords = this.qrData.replace('geo:', '').split('?')[0];
-                return `📍 ${coords}`;
+                return 'GPS Location';
             case 'sms':
-                return this.qrData.replace('smsto:', '').split(':')[0];
+                return 'SMS Message';
             case 'upi':
-                const upiMatch = this.qrData.match(/pa=([^&]+)/);
-                return upiMatch ? decodeURIComponent(upiMatch[1]) : 'UPI Payment';
+                return 'UPI Payment';
+            case 'social':
+                return 'Social Media';
             case 'bank':
-                const beneficiaryMatch = this.qrData.match(/Beneficiary: ([^\n]+)/);
-                return beneficiaryMatch ? beneficiaryMatch[1] : 'Bank Transfer';
+                return 'Bank Account';
             case 'event':
-                const summaryMatch = this.qrData.match(/SUMMARY:([^\r\n]+)/);
-                return summaryMatch ? summaryMatch[1] : 'Calendar Event';
+                return 'Calendar Event';
             case 'crypto':
-                const cryptoAddr = this.qrData.split(':')[1]?.split('?')[0];
-                return cryptoAddr ? cryptoAddr.substring(0, 20) + '...' : 'Crypto Address';
+                return 'Crypto Address';
             case 'barcode':
-                return `Barcode: ${this.qrData.substring(0, 20)}`;
+                return 'Product Barcode';
+            case 'app':
+                return 'Smart App Link';
+            case 'meeting':
+                return 'Meeting Invite';
+            case 'paypal':
+                return 'PayPal.me Link';
+            case 'medical':
+                return 'Medical Info Card';
+            case 'donate':
+                return 'Donation Page';
+            case 'discord':
+                return 'Discord Invite';
+            case 'book':
+                return 'Book Search';
+            case 'developer':
+                return 'Developer Project';
+            case 'coupon':
+                return 'Coupon Card';
+            case 'secret':
+                return 'Secret Note';
+            case 'maps':
+                return 'Smart Maps';
+            case 'wa': return 'WhatsApp Link';
+            case 'tg': return 'Telegram Link';
+            case 'vb': return 'Viber Link';
+            case 'sk': return 'Skype Link';
+            case 'ft': return 'Facetime Video';
+            case 'fta': return 'Facetime Audio';
+            case 'zm': return 'Zoom Deep Link';
+            case 'wx': return 'Webex Deep Link';
+            case 'sp': return 'Spotify Search';
+            case 'yt': return 'YouTube Action';
+            case 'yl': return 'Yelp Place';
+            case 'im': return 'IMDb Movie';
+            case 'fq': return 'Foursquare Venue';
+            case 'as': return 'App Store Search';
+            case 'ps': return 'Play Store Search';
+            case 'prompt': return 'AI Prompt';
+            case 'totp': return 'Authenticator 2FA';
+            case 'uber': return 'Uber Ride';
+            case 'lyft': return 'Lyft Ride';
             default:
                 return this.qrData.length > 30 ? this.qrData.substring(0, 30) + '...' : this.qrData;
         }
@@ -1426,7 +2315,7 @@ class QRGeneratorPro {
                         </div>
                     </div>
                     <div class="history-panel-item-actions">
-                        <button class="history-panel-item-delete" onclick="event.stopPropagation(); qrGenerator.deleteHistoryItem(${item.id})" title="Delete from history">
+                        <button class="history-panel-item-delete" onclick="event.stopPropagation(); window.qrApp.deleteHistoryItem(${item.id})" title="Delete from history">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -1515,10 +2404,23 @@ class QRGeneratorPro {
             this.customization = { ...this.customization, ...item.customization };
 
             // Update UI elements
-            document.getElementById('fg-color').value = this.customization.fgColor;
-            document.getElementById('bg-color').value = this.customization.bgColor;
-            document.getElementById('size-slider').value = this.customization.size;
-            document.getElementById('size-value').textContent = `${this.customization.size}px`;
+            const fgInput = document.getElementById('fg-color');
+            const bgInput = document.getElementById('bg-color');
+            const sizeSldr = document.getElementById('size-slider');
+            const sizeVal = document.getElementById('size-value');
+
+            if (fgInput) fgInput.value = this.customization.fgColor;
+            if (bgInput) bgInput.value = this.customization.bgColor;
+            if (sizeSldr) sizeSldr.value = this.customization.size;
+            if (sizeVal) sizeVal.textContent = `${this.customization.size}px`;
+
+            // Active state for pattern/corners
+            document.querySelectorAll('.pattern-option').forEach(opt => {
+                opt.classList.toggle('active', opt.dataset.pattern === this.customization.pattern);
+            });
+            document.querySelectorAll('.corner-option').forEach(opt => {
+                opt.classList.toggle('active', opt.dataset.corner === this.customization.cornerStyle);
+            });
         }
 
         // Update UI to show selected type
@@ -1877,6 +2779,11 @@ class QRGeneratorPro {
 
             // Save to history after successful generation
             this.saveToHistory(this.selectedType, this.qrData, this.getDisplayText());
+
+            // Auto-download if enabled in settings
+            if (this.appSettings && this.appSettings.autoDownload) {
+                setTimeout(() => this.downloadQR(), 800);
+            }
         } catch (error) {
             console.error('Generation error:', error);
             this.showError(`Failed to generate ${this.selectedType === 'barcode' ? 'barcode' : 'QR code'}: ${error.message}`);
@@ -1923,7 +2830,7 @@ class QRGeneratorPro {
                 dark: this.customization.fgColor,
                 light: this.customization.bgColor
             },
-            errorCorrectionLevel: this.customization.logo ? 'H' : 'M' // High error correction for logos
+            errorCorrectionLevel: 'H' // Force high error correction for maximum scannability
         };
 
         try {
@@ -2015,6 +2922,14 @@ class QRGeneratorPro {
                 if (!text || text.trim() === '') {
                     reject(new Error('No text provided for QR generation'));
                     return;
+                }
+
+                // SCANABILITY ENHANCEMENT: Contrast Check
+                const contrast = this.getContrastRatio(options.color.dark, options.color.light);
+                if (contrast < 1.8) {
+                    console.warn('Low contrast detected, adjusting colors for scanability');
+                    options.color.dark = '#000000';
+                    options.color.light = '#ffffff';
                 }
 
                 console.log(`Generating QR with method: ${this.qrMethod}`);
@@ -2302,6 +3217,25 @@ class QRGeneratorPro {
         return Math.abs(hash);
     }
 
+    getContrastRatio(color1, color2) {
+        const getLuminance = (hex) => {
+            try {
+                const rgb = parseInt(hex.substring(1), 16);
+                const r = (rgb >> 16) & 0xff;
+                const g = (rgb >> 8) & 0xff;
+                const b = (rgb >> 0) & 0xff;
+                const [rl, gl, bl] = [r, g, b].map(v => {
+                    v /= 255;
+                    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+                });
+                return 0.2126 * rl + 0.7152 * gl + 0.0722 * bl;
+            } catch (e) { return 0.5; }
+        };
+        const l1 = getLuminance(color1);
+        const l2 = getLuminance(color2);
+        return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+    }
+
     isFinderPattern(row, col, size) {
         // Top-left finder pattern
         if (row < 7 && col < 7) return true;
@@ -2393,37 +3327,57 @@ class QRGeneratorPro {
     showValidationError() {
         // Highlight required fields
         const requiredInputs = document.querySelectorAll('.form-input[required]');
+        let firstMissing = null;
+
         requiredInputs.forEach(input => {
             if (!input.value.trim()) {
                 input.style.borderColor = '#e53e3e';
+                input.style.boxShadow = '0 0 0 3px rgba(229, 62, 62, 0.2)';
                 input.style.animation = 'shake 0.5s ease-in-out';
+                if (!firstMissing) firstMissing = input;
             }
         });
 
+        if (firstMissing) {
+            firstMissing.focus();
+        }
+
         // Show error message
         const container = document.getElementById('input-container');
+        if (!container) return;
+
         let errorDiv = container.querySelector('.validation-error');
 
         if (!errorDiv) {
             errorDiv = document.createElement('div');
             errorDiv.className = 'validation-error';
             errorDiv.innerHTML = `
-                <i class="fas fa-exclamation-circle"></i>
-                <span>Please fill in all required fields</span>
+                <i class="fas fa-exclamation-circle" style="font-size: 1.2rem;"></i>
+                <div style="display: flex; flex-direction: column;">
+                    <span style="font-size: 1rem; font-weight: 600;">Missing Information</span>
+                    <span style="font-size: 0.85rem; opacity: 0.8;">Please fill in all required fields marked with *</span>
+                </div>
             `;
             container.appendChild(errorDiv);
         }
 
-        // Remove error after 3 seconds
+        // Scroll to error if not in view
+        errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        // Remove error after 4 seconds
         setTimeout(() => {
             if (errorDiv && errorDiv.parentNode) {
-                errorDiv.remove();
+                errorDiv.style.opacity = '0';
+                errorDiv.style.transform = 'translateY(10px)';
+                errorDiv.style.transition = 'all 0.5s ease';
+                setTimeout(() => errorDiv.remove(), 500);
             }
             requiredInputs.forEach(input => {
                 input.style.borderColor = '';
+                input.style.boxShadow = '';
                 input.style.animation = '';
             });
-        }, 3000);
+        }, 4000);
     }
 
     showLoadingAnimation() {
@@ -3024,6 +3978,158 @@ class QRGeneratorPro {
         }
     }
 
+    // ==========================================
+    // SETTINGS SYSTEM
+    // ==========================================
+
+    initSettings() {
+        this.appSettings = JSON.parse(localStorage.getItem('qr-app-settings')) || {
+            highQuality: true,
+            autoDownload: false,
+            defaultSize: 3000,
+            defaultFg: '#000000',
+            defaultBg: '#ffffff',
+            errorCorrection: 'M'
+        };
+
+        // Clamp stored size to new range
+        if (this.appSettings.defaultSize < 3000) this.appSettings.defaultSize = 3000;
+        if (this.appSettings.defaultSize > 8000) this.appSettings.defaultSize = 8000;
+        this.customization.size = this.appSettings.defaultSize;
+
+        // 1) High Quality Setting (Replacing Grid Columns)
+        const hqToggle = document.getElementById('setting-high-quality');
+        if (hqToggle) {
+            hqToggle.checked = this.appSettings.highQuality;
+            hqToggle.addEventListener('change', (e) => {
+                this.appSettings.highQuality = e.target.checked;
+                this.saveSettings();
+            });
+        }
+
+        // 2) Auto Download
+        const autoDL = document.getElementById('setting-auto-download');
+        if (autoDL) {
+            autoDL.checked = this.appSettings.autoDownload;
+            autoDL.addEventListener('change', (e) => {
+                this.appSettings.autoDownload = e.target.checked;
+                this.saveSettings();
+            });
+        }
+
+        // 3) Default Size
+        const sizeSlider = document.getElementById('setting-default-size');
+        const sizeVal = document.getElementById('setting-default-size-val');
+        if (sizeSlider) {
+            sizeSlider.value = this.appSettings.defaultSize;
+            sizeVal.textContent = this.appSettings.defaultSize + 'px';
+            sizeSlider.addEventListener('input', (e) => {
+                this.appSettings.defaultSize = parseInt(e.target.value);
+                sizeVal.textContent = e.target.value + 'px';
+                // Sync with the customization size slider on page 3
+                const custSlider = document.getElementById('size-slider');
+                const custVal = document.getElementById('size-value');
+                if (custSlider) { custSlider.value = e.target.value; }
+                if (custVal) { custVal.textContent = e.target.value + 'px'; }
+                this.customization.size = parseInt(e.target.value);
+                this.saveSettings();
+            });
+        }
+
+        // 4) Default FG Color
+        const fgInput = document.getElementById('setting-fg-color');
+        if (fgInput) {
+            fgInput.value = this.appSettings.defaultFg;
+            fgInput.addEventListener('change', (e) => {
+                this.appSettings.defaultFg = e.target.value;
+                this.customization.fgColor = e.target.value;
+                const p3fg = document.getElementById('fg-color');
+                if (p3fg) p3fg.value = e.target.value;
+                this.saveSettings();
+            });
+        }
+
+        // 5) Default BG Color
+        const bgInput = document.getElementById('setting-bg-color');
+        if (bgInput) {
+            bgInput.value = this.appSettings.defaultBg;
+            bgInput.addEventListener('change', (e) => {
+                this.appSettings.defaultBg = e.target.value;
+                this.customization.bgColor = e.target.value;
+                const p3bg = document.getElementById('bg-color');
+                if (p3bg) p3bg.value = e.target.value;
+                this.saveSettings();
+            });
+        }
+
+        // 6) Error Correction Level
+        const ecSelect = document.getElementById('setting-error-correction');
+        if (ecSelect) {
+            ecSelect.value = this.appSettings.errorCorrection;
+            ecSelect.addEventListener('change', (e) => {
+                this.appSettings.errorCorrection = e.target.value;
+                this.saveSettings();
+            });
+        }
+
+        // Apply initial state
+        this.customization.fgColor = this.appSettings.defaultFg;
+        this.customization.bgColor = this.appSettings.defaultBg;
+        this.customization.size = this.appSettings.defaultSize;
+        const p3fg = document.getElementById('fg-color');
+        const p3bg = document.getElementById('bg-color');
+        const p3size = document.getElementById('size-slider');
+        const p3sizeVal = document.getElementById('size-value');
+        if (p3fg) p3fg.value = this.appSettings.defaultFg;
+        if (p3bg) p3bg.value = this.appSettings.defaultBg;
+        if (p3size) p3size.value = this.appSettings.defaultSize;
+        if (p3sizeVal) p3sizeVal.textContent = this.appSettings.defaultSize + 'px';
+
+        this.applyGridSettings();
+    }
+
+    saveSettings() {
+        localStorage.setItem('qr-app-settings', JSON.stringify(this.appSettings));
+    }
+
+    applyGridSettings() {
+        const width = window.innerWidth;
+        let cols = 2;
+        let maxW = '100%';
+
+        if (width > 1200) {
+            cols = 6;
+            maxW = '1400px';
+        } else if (width > 992) {
+            cols = 5;
+            maxW = '1100px';
+        } else if (width > 768) {
+            cols = 4;
+            maxW = '900px';
+        } else if (width > 480) {
+            cols = 3;
+            maxW = '100%';
+        } else {
+            cols = 2;
+            maxW = '100%';
+        }
+
+        document.documentElement.style.setProperty('--grid-cols', cols);
+        document.documentElement.style.setProperty('--grid-max-width', maxW);
+    }
+
+    toggleSettingsPanel() {
+        const panel = document.getElementById('settings-panel');
+        if (panel) panel.classList.toggle('active');
+    }
+
+    clearAppData() {
+        if (confirm('This will permanently delete all your history and settings. Continue?')) {
+            localStorage.clear();
+            this.showNotification('All data cleared!', 'success');
+            setTimeout(() => window.location.reload(), 600);
+        }
+    }
 }
 
 // Global functions for HTML onclick handlers
