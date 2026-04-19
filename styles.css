@@ -505,6 +505,19 @@ body {
   margin-bottom: 20px;
 }
 
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 480px) {
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
 .form-group label {
   display: block;
   font-weight: 700;
@@ -765,6 +778,7 @@ select.form-input {
   justify-content: center;
   min-height: 300px;
   position: relative;
+  overflow: visible;
   box-shadow: 0 20px 60px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
 }
 
@@ -1881,3 +1895,461 @@ select.form-input {
 }
 
 .premium-security-note i { color: #48bb78; }
+
+/* ═══════════════════════════════════════════════════
+   QR GENERATION ANIMATION SYSTEM
+   ═══════════════════════════════════════════════════ */
+
+/* --- Particle Vortex Container --- */
+.qr-gen-animation {
+  position: relative;
+  width: 260px;
+  height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.qr-gen-animation.qr-gen-collapse {
+  transform: scale(0) rotate(180deg);
+  opacity: 0;
+}
+
+/* --- Glowing Orb Core --- */
+.qr-gen-orb {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-gen-orb-core {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 8px;
+  box-shadow: 0 0 40px rgba(102, 126, 234, 0.6),
+              0 0 80px rgba(118, 75, 162, 0.3);
+  animation: qr-orb-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes qr-orb-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(102,126,234,0.6), 0 0 80px rgba(118,75,162,0.3); }
+  50%      { transform: scale(1.15); box-shadow: 0 0 60px rgba(102,126,234,0.8), 0 0 120px rgba(118,75,162,0.5); }
+}
+
+/* --- Spinning Orbital Rings --- */
+.qr-gen-orb-ring {
+  position: absolute;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  animation: qr-ring-spin linear infinite;
+}
+
+.qr-gen-orb-ring.ring-1 {
+  width: 80px;
+  height: 80px;
+  border-top-color: #667eea;
+  border-right-color: rgba(102,126,234,0.3);
+  animation-duration: 1.5s;
+}
+
+.qr-gen-orb-ring.ring-2 {
+  width: 110px;
+  height: 110px;
+  border-bottom-color: #764ba2;
+  border-left-color: rgba(118,75,162,0.3);
+  animation-duration: 2s;
+  animation-direction: reverse;
+}
+
+.qr-gen-orb-ring.ring-3 {
+  width: 140px;
+  height: 140px;
+  border-top-color: #f093fb;
+  border-right-color: rgba(240,147,251,0.2);
+  animation-duration: 2.5s;
+}
+
+@keyframes qr-ring-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* --- Flying QR Module Blocks --- */
+.qr-gen-blocks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.qr-gen-block {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--size, 6px);
+  height: var(--size, 6px);
+  background: hsl(var(--hue, 250), 80%, 65%);
+  border-radius: 2px;
+  transform: translate(var(--start-x), var(--start-y));
+  animation: qr-block-fly 1.6s cubic-bezier(0.2, 0, 0.2, 1) var(--delay, 0s) forwards;
+  box-shadow: 0 0 8px hsl(var(--hue, 250), 80%, 65%),
+              0 0 16px hsla(var(--hue, 250), 80%, 65%, 0.4);
+  opacity: 0;
+}
+
+@keyframes qr-block-fly {
+  0%   { opacity: 0; transform: translate(var(--start-x), var(--start-y)) scale(0); }
+  20%  { opacity: 1; transform: translate(var(--start-x), var(--start-y)) scale(1); }
+  100% { opacity: 0; transform: translate(0, 0) scale(0.5); }
+}
+
+/* --- Status Text & Progress Bar --- */
+.qr-gen-status {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  width: 200px;
+}
+
+.qr-gen-status-text {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #667eea;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 10px;
+  animation: qr-status-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes qr-status-glow {
+  0%, 100% { opacity: 0.7; }
+  50%      { opacity: 1; }
+}
+
+.qr-gen-progress {
+  height: 4px;
+  background: rgba(102, 126, 234, 0.15);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.qr-gen-progress-fill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+  border-radius: 4px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 12px rgba(102, 126, 234, 0.5);
+}
+
+/* --- QR Canvas Reveal Animation --- */
+.qr-canvas-reveal {
+  max-width: 100%;
+  max-height: 400px;
+  height: auto;
+  border-radius: 14px;
+  display: block;
+  margin: 0 auto;
+  opacity: 0;
+  transform: scale(0.5) rotateY(90deg);
+  transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 25px 80px rgba(102, 126, 234, 0.2);
+}
+
+.qr-canvas-reveal.qr-canvas-visible {
+  opacity: 1;
+  transform: scale(1) rotateY(0);
+  box-shadow: 0 25px 80px rgba(102, 126, 234, 0.15),
+              0 0 0 1px rgba(102,126,234,0.08);
+}
+
+/* --- Reveal Confetti Particles --- */
+.reveal-particle {
+  position: absolute;
+  width: var(--size, 5px);
+  height: var(--size, 5px);
+  background: var(--color, #667eea);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: reveal-particle-burst 0.9s cubic-bezier(0.2, 0.6, 0.3, 1) var(--delay, 0s) forwards;
+  z-index: 10;
+}
+
+@keyframes reveal-particle-burst {
+  0%   { opacity: 1; transform: translate(-50%, -50%) scale(0); }
+  30%  { opacity: 1; transform: translate(
+    calc(-50% + var(--px, 0px) * 0.3),
+    calc(-50% + var(--py, 0px) * 0.3)
+  ) scale(1.2); }
+  100% { opacity: 0; transform: translate(
+    calc(-50% + var(--px, 0px)),
+    calc(-50% + var(--py, 0px))
+  ) scale(0); }
+}
+
+/* --- Glow Ring on Reveal --- */
+.qr-reveal-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 0;
+  height: 0;
+  border: 3px solid rgba(102, 126, 234, 0.5);
+  border-radius: 50%;
+  animation: qr-glow-expand 0.8s cubic-bezier(0.2, 0, 0.2, 1) forwards;
+  pointer-events: none;
+  z-index: 5;
+}
+
+@keyframes qr-glow-expand {
+  0%   { width: 0; height: 0; opacity: 1; border-width: 3px; }
+  100% { width: 350px; height: 350px; opacity: 0; border-width: 1px; }
+}
+
+/* --- Barcode Generation Animation --- */
+.barcode-animation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 24px;
+}
+
+.barcode-header {
+  text-align: center;
+}
+
+.barcode-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #2d3748;
+  margin-bottom: 8px;
+}
+
+.barcode-title i {
+  color: #667eea;
+  font-size: 22px;
+}
+
+.barcode-progress-text {
+  font-size: 13px;
+  color: #a0aec0;
+  font-weight: 500;
+}
+
+.barcode-preview-area {
+  position: relative;
+  width: 240px;
+  height: 120px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 2px solid #edf2f7;
+  padding: 16px;
+}
+
+.barcode-bars-container {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 100%;
+}
+
+.animated-bar {
+  height: 0;
+  background: linear-gradient(180deg, #667eea, #764ba2);
+  border-radius: 1px;
+  transition: height 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.animated-bar.visible {
+  height: 100%;
+}
+
+.barcode-scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #667eea, transparent);
+  animation: barcode-scan 1.5s ease-in-out infinite;
+  box-shadow: 0 0 12px rgba(102, 126, 234, 0.5);
+}
+
+@keyframes barcode-scan {
+  0%, 100% { top: 0; opacity: 0; }
+  10%      { opacity: 1; }
+  90%      { opacity: 1; }
+  50%      { top: calc(100% - 3px); }
+}
+
+.barcode-status {
+  font-size: 12px;
+  font-weight: 700;
+  color: #667eea;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  animation: qr-status-glow 1.5s ease-in-out infinite;
+}
+
+/* --- Error Animation --- */
+.error-animation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 40px;
+  text-align: center;
+}
+
+.error-icon {
+  width: 64px;
+  height: 64px;
+  background: #fff5f5;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #e53e3e;
+  animation: error-shake 0.5s ease;
+}
+
+@keyframes error-shake {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-8px); }
+  40%      { transform: translateX(8px); }
+  60%      { transform: translateX(-4px); }
+  80%      { transform: translateX(4px); }
+}
+
+.error-message h3 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #2d3748;
+  margin-bottom: 8px;
+}
+
+.error-message p {
+  font-size: 14px;
+  color: #718096;
+  margin-bottom: 16px;
+  max-width: 300px;
+}
+
+.retry-btn {
+  padding: 12px 28px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.35);
+}
+
+.retry-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.45);
+}
+
+/* --- No Results Message --- */
+.no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: #a0aec0;
+  gap: 12px;
+}
+
+.no-results i {
+  font-size: 48px;
+  color: #e2e8f0;
+}
+
+.no-results h3 {
+  font-size: 18px;
+  color: #718096;
+  font-weight: 700;
+}
+
+.no-results p {
+  font-size: 14px;
+  max-width: 300px;
+}
+
+/* --- Validation Error Animation & Styles --- */
+.validation-error {
+  background: #fff5f5;
+  border: 1px solid #feb2b2;
+  border-left: 4px solid #e53e3e;
+  border-radius: 8px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #c53030;
+  margin-bottom: 20px;
+  animation: fadeSlideDown 0.4s ease-out forwards;
+}
+
+@keyframes fadeSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+
+/* --- Action Button Highlights --- */
+.action-btn {
+  will-change: transform, opacity;
+}
+
+/* --- Step Process Animation (If needed) --- */
+.build-step {
+  transition: all 0.3s ease;
+}
+.build-step.active {
+  color: #667eea;
+  font-weight: 700;
+}
+.build-step.completed {
+  color: #48bb78;
+}
