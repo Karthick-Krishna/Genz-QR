@@ -780,6 +780,10 @@ select.form-input {
   position: relative;
   overflow: visible;
   box-shadow: 0 20px 60px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
+  perspective: 1200px;
+  transform-style: preserve-3d;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 #qr-canvas {
