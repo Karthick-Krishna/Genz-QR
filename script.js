@@ -41,7 +41,7 @@ class QRGeneratorPro {
             cornerStyle: 'default',
             fgColor: '#000000',
             bgColor: '#ffffff',
-            size: 3000,
+            size: 512,
             logo: null
         };
         this.history = this.loadHistory();
@@ -260,7 +260,7 @@ class QRGeneratorPro {
         if (sizeSlider) {
             sizeSlider.addEventListener('input', (e) => {
                 const val = parseInt(e.target.value, 10);
-                if (!isNaN(val) && val >= 3000 && val <= 8000) {
+                if (!isNaN(val) && val >= 300 && val <= 3000) {
                     clearTimeout(sizeTimeout);
                     sizeTimeout = setTimeout(() => {
                         this.customization.size = val;
@@ -2820,10 +2820,10 @@ class QRGeneratorPro {
 
         this.isGenerating = true;
 
-        // Ensure size is a valid integer
-        this.customization.size = parseInt(this.customization.size, 10) || 3000;
-        if (this.customization.size < 3000) this.customization.size = 3000;
-        if (this.customization.size > 8000) this.customization.size = 8000;
+        // Ensure size is a valid integer (Clamped for performance and quality)
+        this.customization.size = parseInt(this.customization.size, 10) || 512;
+        if (this.customization.size < 256) this.customization.size = 256;
+        if (this.customization.size > 2000) this.customization.size = 2000;
 
         // Go directly to result page
         this.goToPage(4);
@@ -3462,7 +3462,7 @@ class QRGeneratorPro {
 
             // First generate the actual QR code on a temp canvas
             const tempCanvas = document.createElement('canvas');
-            const size = parseInt(this.customization.size, 10) || 3000;
+            const size = parseInt(this.customization.size, 10) || 512;
             tempCanvas.width = size;
             tempCanvas.height = size;
 
@@ -3542,18 +3542,16 @@ class QRGeneratorPro {
             // ——— Phase 3: Reveal the actual QR code ———
             container.innerHTML = '';
 
-            const canvas = document.createElement('canvas');
-            canvas.id = 'qr-canvas';
-            canvas.width = tempCanvas.width;
-            canvas.height = tempCanvas.height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(tempCanvas, 0, 0);
-            canvas.className = 'qr-canvas-reveal';
+            // Use the tempCanvas directly to save memory on mobile
+            tempCanvas.id = 'qr-canvas';
+            tempCanvas.className = 'qr-canvas-reveal';
+            tempCanvas.style.display = 'block'; // Ensure it's visible
 
-            container.appendChild(canvas);
+            container.appendChild(tempCanvas);
+            const canvas = tempCanvas;
 
-            // Trigger reveal animation
-            await new Promise(r => setTimeout(r, 30));
+            // Trigger reveal animation with slightly more delay for mobile reliability
+            await new Promise(r => setTimeout(r, 100));
             canvas.classList.add('qr-canvas-visible');
 
             // Burst confetti particles
@@ -4100,15 +4098,15 @@ class QRGeneratorPro {
         this.appSettings = JSON.parse(localStorage.getItem('qr-app-settings')) || {
             highQuality: true,
             autoDownload: false,
-            defaultSize: 3000,
+            defaultSize: 512,
             defaultFg: '#000000',
             defaultBg: '#ffffff',
             errorCorrection: 'M'
         };
 
         // Clamp stored size to new range
-        if (this.appSettings.defaultSize < 3000) this.appSettings.defaultSize = 3000;
-        if (this.appSettings.defaultSize > 8000) this.appSettings.defaultSize = 8000;
+        if (this.appSettings.defaultSize < 300) this.appSettings.defaultSize = 300;
+        if (this.appSettings.defaultSize > 3000) this.appSettings.defaultSize = 3000;
         this.customization.size = this.appSettings.defaultSize;
 
         // 1) High Quality Setting (Replacing Grid Columns)
