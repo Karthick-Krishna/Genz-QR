@@ -165,7 +165,7 @@
                     <!-- Settings Gear Icon -->
                     <button class="settings-gear-btn" id="settings-gear-btn" onclick="toggleSettingsPanel()"
                         title="Settings">
-                        <i class="fas fa-cog"></i>
+                        <i class="fa-solid fa-gear"></i>
                     </button>
                 </div>
                 <div class="header-info">
@@ -217,27 +217,27 @@
                             </button>
                             <button class="filter-tab" data-category="essentials">
                                 <i class="fas fa-star"></i>
-                                <span>Essential</span>
-                            </button>
-                            <button class="filter-tab" data-category="identity">
-                                <i class="fas fa-id-card"></i>
-                                <span>Identity</span>
-                            </button>
-                            <button class="filter-tab" data-category="finance">
-                                <i class="fas fa-dollar-sign"></i>
-                                <span>Finance</span>
+                                <span>Essentials</span>
                             </button>
                             <button class="filter-tab" data-category="social">
-                                <i class="fas fa-share-alt"></i>
-                                <span>Social</span>
+                                <i class="fas fa-comments"></i>
+                                <span>Social & Comm</span>
+                            </button>
+                            <button class="filter-tab" data-category="finance">
+                                <i class="fas fa-wallet"></i>
+                                <span>Payments</span>
+                            </button>
+                            <button class="filter-tab" data-category="apps">
+                                <i class="fas fa-mobile-alt"></i>
+                                <span>App & Links</span>
                             </button>
                             <button class="filter-tab" data-category="tech">
                                 <i class="fas fa-code"></i>
-                                <span>Tech</span>
+                                <span>Dev & Tech</span>
                             </button>
-                            <button class="filter-tab" data-category="lifestyle">
-                                <i class="fas fa-heart"></i>
-                                <span>Lifestyle</span>
+                            <button class="filter-tab" data-category="personal">
+                                <i class="fas fa-user-lock"></i>
+                                <span>Personal</span>
                             </button>
                         </div>
                     </div>
@@ -250,7 +250,7 @@
 
 
 
-                <h2 class="sector-title" data-category="essentials">Essentials & Utilities</h2>
+                <h2 class="sector-title" data-category="essentials">Essentials</h2>
                 <div class="type-grid" data-category="essentials">
                     <div class="type-card" data-type="text" data-keywords="text message plain simple basic">
                         <div class="type-icon"><i class="fas fa-font"></i></div>
@@ -261,6 +261,21 @@
                         <div class="type-icon"><i class="fas fa-link"></i></div>
                         <h3>Website</h3>
                         <p>Web link</p>
+                    </div>
+                    <div class="type-card" data-type="wifi" data-keywords="wifi wireless network internet connection">
+                        <div class="type-icon"><i class="fas fa-wifi"></i></div>
+                        <h3>WiFi</h3>
+                        <p>Network config</p>
+                    </div>
+                    <div class="type-card" data-type="contact" data-keywords="contact vcard business card info details">
+                        <div class="type-icon"><i class="fas fa-address-card"></i></div>
+                        <h3>vCard</h3>
+                        <p>Contact Info</p>
+                    </div>
+                    <div class="type-card" data-type="location" data-keywords="location gps coordinates map address">
+                        <div class="type-icon"><i class="fas fa-map-marker-alt"></i></div>
+                        <h3>Location</h3>
+                        <p>GPS coords</p>
                     </div>
                     <div class="type-card" data-type="phone" data-keywords="phone call telephone number mobile">
                         <div class="type-icon"><i class="fas fa-phone"></i></div>
@@ -277,263 +292,192 @@
                         <h3>Email</h3>
                         <p>Email format</p>
                     </div>
-                    <div class="type-card" data-type="location" data-keywords="location gps coordinates map address">
-                        <div class="type-icon"><i class="fas fa-map-marker-alt"></i></div>
-                        <h3>Location</h3>
-                        <p>GPS coords</p>
+                    <div class="type-card" data-type="event" data-keywords="event calendar file appointment meeting schedule">
+                        <div class="type-icon"><i class="fas fa-calendar-alt"></i></div>
+                        <h3>Event</h3>
+                        <p>Calendar invite</p>
                     </div>
-                    <div class="type-card" data-type="wifi" data-keywords="wifi wireless network internet connection">
-                        <div class="type-icon"><i class="fas fa-wifi"></i></div>
-                        <h3>WiFi</h3>
-                        <p>Network config</p>
-                    </div>
-                    <div class="type-card" data-type="prompt"
-                        data-keywords="ai prompt llm chatgpt artificial intelligence">
-                        <div class="type-icon"><i class="fas fa-robot"></i></div>
-                        <h3>AI Prompt</h3>
-                        <p>LLM prompt txt</p>
-                    </div>
-                </div>
-
-                <h2 class="sector-title" data-category="identity">Identity & Contacts</h2>
-                <div class="type-grid" data-category="identity">
-                    <div class="type-card" data-type="contact" data-keywords="contact vcard business card info details">
-                        <div class="type-icon"><i class="fas fa-address-card"></i></div>
-                        <h3>vCard</h3>
-                        <p>Contact Info</p>
-                    </div>
-                    <div class="type-card" data-type="mecard" data-keywords="mecard contact business card simple">
-                        <div class="type-icon"><i class="fas fa-id-badge"></i></div>
-                        <h3>MeCard</h3>
-                        <p>Lite Contact</p>
-                    </div>
-                    <div class="type-card" data-type="linkedin"
-                        data-keywords="linkedin professional profile career job">
-                        <div class="type-icon"><i class="fab fa-linkedin"></i></div>
-                        <h3>LinkedIn Pro</h3>
-                        <p>Prof. Profile</p>
-                    </div>
-                    <div class="type-card" data-type="portfolio" data-keywords="portfolio cv resume website personal">
-                        <div class="type-icon"><i class="fas fa-briefcase"></i></div>
-                        <h3>Portfolio/CV</h3>
-                        <p>Work Showcase</p>
-                    </div>
-                    <div class="type-card" data-type="idcard" data-keywords="id card license registration member">
-                        <div class="type-icon"><i class="fas fa-id-card-alt"></i></div>
-                        <h3>Member ID</h3>
-                        <p>License/Reg</p>
-                    </div>
-                    <div class="type-card" data-type="medical" data-keywords="medical emergency health doctor hospital">
-                        <div class="type-icon"><i class="fas fa-user-md"></i></div>
-                        <h3>Medical</h3>
-                        <p>Emergency id</p>
-                    </div>
-                </div>
-
-                <h2 class="sector-title" data-category="finance">Finance & Business</h2>
-                <div class="type-grid" data-category="finance">
-                    <div class="type-card" data-type="paypal" data-keywords="paypal payment money transfer online">
-                        <div class="type-icon"><i class="fab fa-paypal"></i></div>
-                        <h3>PayPal</h3>
-                        <p>Payment</p>
-                    </div>
-                    <div class="type-card" data-type="upi" data-keywords="upi payment india rupee money transfer">
-                        <div class="type-icon"><i class="fas fa-rupee-sign"></i></div>
-                        <h3>UPI</h3>
-                        <p>App Payment</p>
-                    </div>
-                    <div class="type-card" data-type="crypto"
-                        data-keywords="crypto bitcoin wallet cryptocurrency blockchain">
-                        <div class="type-icon"><i class="fab fa-bitcoin"></i></div>
-                        <h3>Crypto</h3>
-                        <p>Wallet Address</p>
-                    </div>
-                    <div class="type-card" data-type="donate" data-keywords="donation patreon kofi support funding">
-                        <div class="type-icon"><i class="fas fa-hand-holding-heart"></i></div>
-                        <h3>Donation</h3>
-                        <p>Patreon/Kofi</p>
-                    </div>
-                    <div class="type-card" data-type="coupon" data-keywords="coupon promo discount deal offer">
-                        <div class="type-icon"><i class="fas fa-tag"></i></div>
-                        <h3>Coupon</h3>
-                        <p>Promo Deals</p>
-                    </div>
-                    <div class="type-card" data-type="barcode" data-keywords="barcode scanner format product code">
+                    <div class="type-card" data-type="barcode" data-keywords="barcode scanner format product code ean upc 128">
                         <div class="type-icon"><i class="fas fa-barcode"></i></div>
                         <h3>Barcode</h3>
-                        <p>Format scanner</p>
+                        <p>Product code</p>
                     </div>
                 </div>
 
-                <h2 class="sector-title" data-category="social">Comm & Social DeepLinks</h2>
+                <h2 class="sector-title" data-category="social">Social & Communication</h2>
                 <div class="type-grid" data-category="social">
-                    <div class="type-card" data-type="social"
-                        data-keywords="social media profile links instagram facebook">
-                        <div class="type-icon"><i class="fas fa-share-alt"></i></div>
-                        <h3>Social App</h3>
-                        <p>Profile links</p>
-                    </div>
                     <div class="type-card" data-type="wa" data-keywords="whatsapp message chat direct communication">
                         <div class="type-icon"><i class="fab fa-whatsapp"></i></div>
                         <h3>WhatsApp</h3>
                         <p>Direct Msg</p>
                     </div>
                     <div class="type-card" data-type="tg" data-keywords="telegram message chat direct communication">
-                        <div class="type-icon"><i class="fab fa-telegram"></i></div>
+                        <div class="type-icon"><i class="fab fa-telegram-plane"></i></div>
                         <h3>Telegram</h3>
-                        <p>Direct Msg</p>
-                    </div>
-                    <div class="type-card" data-type="vb" data-keywords="viber message chat direct communication">
-                        <div class="type-icon"><i class="fab fa-viber"></i></div>
-                        <h3>Viber</h3>
                         <p>Direct Msg</p>
                     </div>
                     <div class="type-card" data-type="sk" data-keywords="skype call video chat communication">
                         <div class="type-icon"><i class="fab fa-skype"></i></div>
                         <h3>Skype</h3>
-                        <p>Direct Call</p>
+                        <p>Voice/Video Call</p>
                     </div>
-                    <div class="type-card" data-type="ft" data-keywords="facetime video call apple ios">
+                    <div class="type-card" data-type="ft" data-keywords="facetime video call apple ios iphone ipad mac">
                         <div class="type-icon"><i class="fas fa-video"></i></div>
                         <h3>Facetime</h3>
-                        <p>Apple Video</p>
+                        <p>Video Call</p>
                     </div>
-                    <div class="type-card" data-type="fta" data-keywords="facetime audio call apple ios voice">
-                        <div class="type-icon"><i class="fas fa-phone-alt"></i></div>
-                        <h3>Facetime Audio</h3>
-                        <p>Apple Voice</p>
+                    <div class="type-card" data-type="zm" data-keywords="zoom meeting video conference call link">
+                        <div class="type-icon"><i class="fas fa-video"></i></div>
+                        <h3>Zoom</h3>
+                        <p>Meeting link</p>
                     </div>
-                    <div class="type-card" data-type="discord" data-keywords="discord server gaming chat community">
+                    <div class="type-card" data-type="discord" data-keywords="discord server gaming chat community invite">
                         <div class="type-icon"><i class="fab fa-discord"></i></div>
                         <h3>Discord</h3>
-                        <p>Server Link</p>
+                        <p>Server invite</p>
                     </div>
-                    <div class="type-card" data-type="meeting" data-keywords="meeting conference call video standard">
-                        <div class="type-icon"><i class="fas fa-users"></i></div>
-                        <h3>Meetings</h3>
-                        <p>Standard links</p>
+                    <div class="type-card" data-type="social" data-keywords="social media profile links instagram facebook">
+                        <div class="type-icon"><i class="fas fa-share-alt"></i></div>
+                        <h3>Social Links</h3>
+                        <p>Profile links</p>
                     </div>
-                    <div class="type-card" data-type="zm" data-keywords="zoom meeting video conference call">
-                        <div class="type-icon"><i class="fas fa-video"></i></div>
-                        <h3>Zoom App</h3>
-                        <p>Deep Link</p>
+                    <div class="type-card" data-type="linkedin" data-keywords="linkedin professional profile career job social">
+                        <div class="type-icon"><i class="fab fa-linkedin-in"></i></div>
+                        <h3>LinkedIn</h3>
+                        <p>Pro profile</p>
                     </div>
-                    <div class="type-card" data-type="wx" data-keywords="webex meeting video conference call cisco">
-                        <div class="type-icon"><i class="fas fa-chalkboard-teacher"></i></div>
-                        <h3>Webex App</h3>
-                        <p>Deep Link</p>
+                    <div class="type-card" data-type="portfolio" data-keywords="portfolio cv resume website personal projects">
+                        <div class="type-icon"><i class="fas fa-briefcase"></i></div>
+                        <h3>Portfolio</h3>
+                        <p>Personal work</p>
+                    </div>
+                    <div class="type-card" data-type="yt" data-keywords="youtube video app deep link google watch">
+                        <div class="type-icon"><i class="fab fa-youtube"></i></div>
+                        <h3>YouTube</h3>
+                        <p>Video/Channel</p>
                     </div>
                 </div>
 
-                <h2 class="sector-title" data-category="tech">IT, Sec & Dev Ops</h2>
-                <div class="type-grid" data-category="tech">
-                    <div class="type-card" data-type="developer"
-                        data-keywords="code repository github gitlab development programming">
-                        <div class="type-icon"><i class="fas fa-code-branch"></i></div>
-                        <h3>Code Repos</h3>
-                        <p>Github/Gitlab</p>
+                <h2 class="sector-title" data-category="finance">Payments & Finance</h2>
+                <div class="type-grid" data-category="finance">
+                    <div class="type-card" data-type="upi" data-keywords="upi payment india rupee money transfer">
+                        <div class="type-icon"><i class="fas fa-rupee-sign"></i></div>
+                        <h3>UPI</h3>
+                        <p>App Payment</p>
                     </div>
-                    <div class="type-card" data-type="sshkey" data-keywords="ssh key public security access developer">
+                    <div class="type-card" data-type="paypal" data-keywords="paypal payment money transfer online">
+                        <div class="type-icon"><i class="fab fa-paypal"></i></div>
+                        <h3>PayPal</h3>
+                        <p>Payment</p>
+                    </div>
+                    <div class="type-card" data-type="crypto" data-keywords="crypto bitcoin wallet cryptocurrency eth">
+                        <div class="type-icon"><i class="fab fa-bitcoin"></i></div>
+                        <h3>Crypto</h3>
+                        <p>Wallet Address</p>
+                    </div>
+                    <div class="type-card" data-type="donate" data-keywords="donation patreon kofi support funding charity">
+                        <div class="type-icon"><i class="fas fa-hand-holding-heart"></i></div>
+                        <h3>Donate</h3>
+                        <p>Support link</p>
+                    </div>
+                    <div class="type-card" data-type="coupon" data-keywords="coupon promo discount deal offer save sale">
+                        <div class="type-icon"><i class="fas fa-ticket-alt"></i></div>
+                        <h3>Coupon</h3>
+                        <p>Promo code</p>
+                    </div>
+                </div>
+
+                <h2 class="sector-title" data-category="apps">App & Links</h2>
+                <div class="type-grid" data-category="apps">
+                    <div class="type-card" data-type="maps" data-keywords="maps smart search location navigation direction">
+                        <div class="type-icon"><i class="fas fa-map-marked-alt"></i></div>
+                        <h3>Maps</h3>
+                        <p>Smart Nav</p>
+                    </div>
+                    <div class="type-card" data-type="app" data-keywords="app bundle link application mobile store install">
+                        <div class="type-icon"><i class="fas fa-mobile"></i></div>
+                        <h3>App Links</h3>
+                        <p>Store Deep Link</p>
+                    </div>
+                    <div class="type-card" data-type="sp" data-keywords="spotify music track uri streaming audio playlist">
+                        <div class="type-icon"><i class="fab fa-spotify"></i></div>
+                        <h3>Spotify</h3>
+                        <p>Music Link</p>
+                    </div>
+                    <div class="type-card" data-type="im" data-keywords="imdb movie app link film database actor title">
+                        <div class="type-icon"><i class="fas fa-film"></i></div>
+                        <h3>IMDb</h3>
+                        <p>Movie/Actor</p>
+                    </div>
+                    <div class="type-card" data-type="yl" data-keywords="yelp app business query restaurant review local">
+                        <div class="type-icon"><i class="fab fa-yelp"></i></div>
+                        <h3>Yelp</h3>
+                        <p>Place/Review</p>
+                    </div>
+                </div>
+
+                <h2 class="sector-title" data-category="tech">Developer & Tech</h2>
+                <div class="type-grid" data-category="tech">
+                    <div class="type-card" data-type="developer" data-keywords="code repository github gitlab development programming">
+                        <div class="type-icon"><i class="fab fa-github"></i></div>
+                        <h3>Git Repo</h3>
+                        <p>Code project</p>
+                    </div>
+                    <div class="type-card" data-type="serverinfo" data-keywords="server ip port ssh login credentials host">
+                        <div class="type-icon"><i class="fas fa-server"></i></div>
+                        <h3>Server Info</h3>
+                        <p>Host details</p>
+                    </div>
+                    <div class="type-card" data-type="sshkey" data-keywords="ssh key public security access developer rsa">
                         <div class="type-icon"><i class="fas fa-key"></i></div>
                         <h3>SSH Key</h3>
                         <p>Public Key</p>
                     </div>
-                    <div class="type-card" data-type="docker" data-keywords="docker container image devops kubernetes">
+                    <div class="type-card" data-type="docker" data-keywords="docker container image devops kubernetes hub">
                         <div class="type-icon"><i class="fab fa-docker"></i></div>
                         <h3>Docker Hub</h3>
                         <p>Image Link</p>
                     </div>
-                    <div class="type-card" data-type="serverinfo" data-keywords="server ip port ssh login credentials">
-                        <div class="type-icon"><i class="fas fa-server"></i></div>
-                        <h3>Server Details</h3>
-                        <p>IP & Port Info</p>
-                    </div>
-                    <div class="type-card" data-type="totp" data-keywords="totp 2fa authenticator security two factor">
+                    <div class="type-card" data-type="totp" data-keywords="totp 2fa authenticator security two factor auth">
                         <div class="type-icon"><i class="fas fa-shield-alt"></i></div>
-                        <h3>Authenticator</h3>
-                        <p>2FA TOTP String</p>
+                        <h3>TOTP 2FA</h3>
+                        <p>Auth secret</p>
+                    </div>
+                    <div class="type-card" data-type="prompt" data-keywords="ai prompt llm chatgpt artificial intelligence text">
+                        <div class="type-icon"><i class="fas fa-robot"></i></div>
+                        <h3>AI Prompt</h3>
+                        <p>Text query</p>
                     </div>
                 </div>
 
-                <h2 class="sector-title" data-category="lifestyle">Lifestyle, Media & App Search</h2>
-                <div class="type-grid" data-category="lifestyle">
-                    <div class="type-card" data-type="app" data-keywords="app bundle link generic application mobile">
-                        <div class="type-icon"><i class="fab fa-app-store"></i></div>
-                        <h3>App Bundle</h3>
-                        <p>Link Generics</p>
+                <h2 class="sector-title" data-category="personal">Personal & Utilities</h2>
+                <div class="type-grid" data-category="personal">
+                    <div class="type-card" data-type="medical" data-keywords="medical emergency health doctor hospital blood group">
+                        <div class="type-icon"><i class="fas fa-notes-medical"></i></div>
+                        <h3>Medical Info</h3>
+                        <p>Emergency Card</p>
                     </div>
-                    <div class="type-card" data-type="as" data-keywords="app store ios apple search find application">
-                        <div class="type-icon"><i class="fab fa-apple"></i></div>
-                        <h3>Find App (iOS)</h3>
-                        <p>AppStore Qry</p>
+                    <div class="type-card" data-type="idcard" data-keywords="id card license registration member identity badge">
+                        <div class="type-icon"><i class="fas fa-id-badge"></i></div>
+                        <h3>ID Card</h3>
+                        <p>License/Member</p>
                     </div>
-                    <div class="type-card" data-type="ps"
-                        data-keywords="play store android google search find application">
-                        <div class="type-icon"><i class="fab fa-google-play"></i></div>
-                        <h3>Find App (And)</h3>
-                        <p>PlayStore Qry</p>
+                    <div class="type-card" data-type="mecard" data-keywords="mecard contact business card simple personal info">
+                        <div class="type-icon"><i class="fas fa-id-card-alt"></i></div>
+                        <h3>MeCard</h3>
+                        <p>Simple contact</p>
                     </div>
-                    <div class="type-card" data-type="yt" data-keywords="youtube video app deep link google">
-                        <div class="type-icon"><i class="fab fa-youtube"></i></div>
-                        <h3>YouTube App</h3>
-                        <p>Video Deep Link</p>
-                    </div>
-                    <div class="type-card" data-type="im" data-keywords="imdb movie app link film database">
-                        <div class="type-icon"><i class="fab fa-imdb"></i></div>
-                        <h3>IMDb App</h3>
-                        <p>Movie Link</p>
-                    </div>
-                    <div class="type-card" data-type="sp" data-keywords="spotify music track uri streaming audio">
-                        <div class="type-icon"><i class="fab fa-spotify"></i></div>
-                        <h3>Spotify App</h3>
-                        <p>Track URI</p>
-                    </div>
-                    <div class="type-card" data-type="maps"
-                        data-keywords="maps smart search generic location navigation">
-                        <div class="type-icon"><i class="fas fa-map-marked-alt"></i></div>
-                        <h3>Smart Maps</h3>
-                        <p>Search generic</p>
-                    </div>
-                    <div class="type-card" data-type="yl" data-keywords="yelp app business query restaurant review">
-                        <div class="type-icon"><i class="fab fa-yelp"></i></div>
-                        <h3>Yelp App</h3>
-                        <p>Business Qry</p>
-                    </div>
-                    <div class="type-card" data-type="fq" data-keywords="foursquare venue uri location check in">
-                        <div class="type-icon"><i class="fab fa-foursquare"></i></div>
-                        <h3>Foursquare</h3>
-                        <p>Venue URI</p>
-                    </div>
-                    <div class="type-card" data-type="uber"
-                        data-keywords="uber ride request target transportation taxi">
-                        <div class="type-icon"><i class="fab fa-uber"></i></div>
-                        <h3>Uber Ride</h3>
-                        <p>Request Target</p>
-                    </div>
-                    <div class="type-card" data-type="lyft"
-                        data-keywords="lyft ride request target transportation taxi">
-                        <div class="type-icon"><i class="fab fa-lyft"></i></div>
-                        <h3>Lyft Ride</h3>
-                        <p>Request Target</p>
-                    </div>
-                    <div class="type-card" data-type="event"
-                        data-keywords="event calendar file appointment meeting schedule">
-                        <div class="type-icon"><i class="fas fa-calendar-alt"></i></div>
-                        <h3>Event</h3>
-                        <p>Calendar file</p>
-                    </div>
-                    <div class="type-card" data-type="book" data-keywords="book isbn search library reading literature">
-                        <div class="type-icon"><i class="fas fa-book"></i></div>
-                        <h3>Book Check</h3>
-                        <p>ISBN Search</p>
-                    </div>
-                    <div class="type-card" data-type="secret" data-keywords="secret note hidden text private message">
+                    <div class="type-card" data-type="secret" data-keywords="secret note hidden text private message encrypted">
                         <div class="type-icon"><i class="fas fa-user-secret"></i></div>
                         <h3>Secret Note</h3>
-                        <p>Hidden Text</p>
+                        <p>Private msg</p>
+                    </div>
+                    <div class="type-card" data-type="book" data-keywords="book isbn search library reading literature author">
+                        <div class="type-icon"><i class="fas fa-book"></i></div>
+                        <h3>Book Search</h3>
+                        <p>ISBN link</p>
                     </div>
                 </div>
-
             </div>
         </div>
 
@@ -607,8 +551,8 @@
                     <div class="option-group" id="size-option-group">
                         <label>Quality</label>
                         <div class="size-slider">
-                            <input type="range" id="size-slider" min="300" max="3000" step="100" value="512">
-                            <span id="size-value">512px</span>
+                            <input type="range" id="size-slider" min="3000" max="8000" step="500" value="3000">
+                            <span id="size-value">3000px</span>
                         </div>
                     </div>
                 </div>
