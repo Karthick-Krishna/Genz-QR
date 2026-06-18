@@ -41,7 +41,7 @@ class QRGeneratorPro {
             cornerStyle: 'default',
             fgColor: '#000000',
             bgColor: '#ffffff',
-            size: 512,
+            size: 3000,
             logo: null
         };
         this.history = this.loadHistory();
@@ -78,23 +78,11 @@ class QRGeneratorPro {
     }
 
     ensureLogoColor() {
-        // Ensure logo always stays white
-        const logoIcon = document.querySelector('.logo i');
+        // Simple one-shot color fix — no observer needed
+        const logoIcon = document.querySelector('.logo > i');
         if (logoIcon) {
             logoIcon.style.setProperty('color', 'white', 'important');
             logoIcon.style.setProperty('filter', 'none', 'important');
-        }
-
-        // Monitor for any changes and reapply
-        const observer = new MutationObserver(() => {
-            if (logoIcon) {
-                logoIcon.style.setProperty('color', 'white', 'important');
-                logoIcon.style.setProperty('filter', 'none', 'important');
-            }
-        });
-
-        if (logoIcon) {
-            observer.observe(logoIcon, { attributes: true, attributeFilter: ['style'] });
         }
     }
 
@@ -259,14 +247,11 @@ class QRGeneratorPro {
 
         if (sizeSlider) {
             sizeSlider.addEventListener('input', (e) => {
-                const val = parseInt(e.target.value, 10);
-                if (!isNaN(val) && val >= 300 && val <= 3000) {
-                    clearTimeout(sizeTimeout);
-                    sizeTimeout = setTimeout(() => {
-                        this.customization.size = val;
-                        if (sizeValue) sizeValue.textContent = `${val}px`;
-                    }, 50);
-                }
+                clearTimeout(sizeTimeout);
+                sizeTimeout = setTimeout(() => {
+                    this.customization.size = parseInt(e.target.value);
+                    if (sizeValue) sizeValue.textContent = `${this.customization.size}px`;
+                }, 50);
             }, { passive: true });
         }
 
@@ -307,14 +292,10 @@ class QRGeneratorPro {
     }
 
     initSearchAndFilter() {
-        // Define category mappings
         this.categoryMappings = {
-            'essentials': ['text', 'url', 'phone', 'sms', 'email', 'location', 'wifi', 'prompt'],
-            'identity': ['contact', 'mecard', 'linkedin', 'portfolio', 'idcard', 'medical'],
-            'finance': ['paypal', 'upi', 'crypto', 'donate', 'coupon', 'barcode'],
-            'social': ['social', 'wa', 'tg', 'vb', 'sk', 'ft', 'fta', 'discord', 'meeting', 'zm', 'wx'],
-            'tech': ['developer', 'sshkey', 'docker', 'serverinfo', 'totp'],
-            'lifestyle': ['app', 'as', 'ps', 'yt', 'im', 'sp', 'maps', 'yl', 'fq', 'uber', 'lyft', 'event', 'book', 'secret']
+            'essentials': ['text', 'url', 'wifi', 'contact', 'location'],
+            'social': ['email', 'phone', 'sms', 'wa', 'yt', 'social'],
+            'finance': ['upi', 'paypal']
         };
 
         // Define search keywords for each type
@@ -488,7 +469,6 @@ class QRGeneratorPro {
             // Apply visibility
             if (shouldShow) {
                 card.classList.remove('hidden');
-                card.classList.add('fade-in');
                 visibleCount++;
 
                 if (this.currentSearchTerm) {
@@ -513,7 +493,7 @@ class QRGeneratorPro {
                 }
             } else {
                 card.classList.add('hidden');
-                card.classList.remove('fade-in', 'search-highlight');
+                card.classList.remove('search-highlight');
             }
         });
 
@@ -796,21 +776,13 @@ class QRGeneratorPro {
                         <label for="wifi-password">Password</label>
                         <input type="password" id="wifi-password" class="form-input" placeholder="WiFi password" maxlength="200">
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="wifi-security">Security Type</label>
-                            <select id="wifi-security" class="form-input">
-                                <option value="WPA">WPA/WPA2</option>
-                                <option value="WEP">WEP</option>
-                                <option value="nopass">Open (No Password)</option>
-                            </select>
-                        </div>
-                        <div class="form-group" style="display:flex; align-items:center; height:100%; padding-top:20px;">
-                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                                <input type="checkbox" id="wifi-hidden" style="width:18px;height:18px;">
-                                Hidden Network
-                            </label>
-                        </div>
+                    <div class="form-group">
+                        <label for="wifi-security">Security Type</label>
+                        <select id="wifi-security" class="form-input">
+                            <option value="WPA">WPA/WPA2</option>
+                            <option value="WEP">WEP</option>
+                            <option value="nopass">Open (No Password)</option>
+                        </select>
                     </div>
                 `;
                 break;
@@ -819,20 +791,19 @@ class QRGeneratorPro {
                 title.textContent = 'Location';
                 subtitle.textContent = 'Enter GPS coordinates';
                 html = `
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="location-lat">Latitude *</label>
-                            <input type="number" step="any" id="location-lat" class="form-input" placeholder="12.9716" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="location-lng">Longitude *</label>
-                            <input type="number" step="any" id="location-lng" class="form-input" placeholder="77.5946" required>
-                        </div>
+                    <div class="form-group">
+                        <label for="location-lat">Latitude *</label>
+                        <input type="number" step="any" id="location-lat" class="form-input" placeholder="12.9716° N" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="location-lng">Longitude *</label>
+                        <input type="number" step="any" id="location-lng" class="form-input" placeholder="77.5946° E" required>
                     </div>
                     <div class="form-group">
                         <label for="location-name">Location Name (Optional)</label>
                         <input type="text" id="location-name" class="form-input" placeholder="My Place" maxlength="100">
                     </div>
+
                 `;
                 break;
 
@@ -1063,23 +1034,18 @@ class QRGeneratorPro {
 
             case 'maps':
                 title.textContent = 'Smart Navigation';
-                subtitle.textContent = 'Map App Deep Links';
+                subtitle.textContent = 'Google Maps or Waze';
                 html = `
                     <div class="form-group">
                         <label for="map-platform">App *</label>
                         <select id="map-platform" class="form-input">
-                            <option value="google">Google Maps</option>
-                            <option value="apple">Apple Maps</option>
-                            <option value="waze">Waze</option>
-                            <option value="bing">Bing Maps</option>
-                            <option value="osm">OpenStreetMap</option>
-                            <option value="yandex">Yandex Maps</option>
-                            <option value="here">HERE WeGo</option>
+                            <option value="google">Google Maps Search</option>
+                            <option value="waze">Waze Navigation</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="map-query">Location / Search Query *</label>
-                        <input type="text" id="map-query" class="form-input" placeholder="Eiffel Tower, Paris" required>
+                        <input type="text" id="map-query" class="form-input" placeholder="Eiffel Tower or Address" required>
                     </div>
                 `;
                 break;
@@ -1144,39 +1110,13 @@ class QRGeneratorPro {
                         <label for="medical-name">Full Name *</label>
                         <input type="text" id="medical-name" class="form-input" placeholder="John Doe" required>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="medical-blood">Blood Type</label>
-                            <select id="medical-blood" class="form-input">
-                                <option value="">Select Blood Type...</option>
-                                <option value="A+">A+</option>
-                                <option value="A-">A-</option>
-                                <option value="B+">B+</option>
-                                <option value="B-">B-</option>
-                                <option value="AB+">AB+</option>
-                                <option value="AB-">AB-</option>
-                                <option value="O+">O+</option>
-                                <option value="O-">O-</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="medical-dob">Date of Birth</label>
-                            <input type="date" id="medical-dob" class="form-input">
-                        </div>
+                    <div class="form-group">
+                        <label for="medical-blood">Blood Type</label>
+                        <input type="text" id="medical-blood" class="form-input" placeholder="O+">
                     </div>
                     <div class="form-group">
                         <label for="medical-conditions">Conditions / Allergies</label>
-                        <textarea id="medical-conditions" class="form-input" rows="2" placeholder="Diabetes, Penicillin allergy..."></textarea>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="medical-contact-name">Emergency Contact Name</label>
-                            <input type="text" id="medical-contact-name" class="form-input" placeholder="Jane Doe">
-                        </div>
-                        <div class="form-group">
-                            <label for="medical-contact-phone">Contact Phone</label>
-                            <input type="tel" id="medical-contact-phone" class="form-input" placeholder="+1234567890">
-                        </div>
+                        <textarea id="medical-conditions" class="form-input" rows="3" placeholder="Diabetes, Penicillin allergy..."></textarea>
                     </div>
                 `;
                 break;
@@ -1566,18 +1506,9 @@ class QRGeneratorPro {
             case 'maps':
                 const mapPlat = document.getElementById('map-platform').value;
                 const mapQue = document.getElementById('map-query').value.trim();
-                const encodedQuery = encodeURIComponent(mapQue);
-                
-                switch (mapPlat) {
-                    case 'google': return `https://www.google.com/maps/search/?api=1&query=${encodedQuery}`;
-                    case 'apple': return `https://maps.apple.com/?q=${encodedQuery}`;
-                    case 'waze': return `https://waze.com/ul?q=${encodedQuery}&navigate=yes`;
-                    case 'bing': return `https://www.bing.com/maps?q=${encodedQuery}`;
-                    case 'osm': return `https://www.openstreetmap.org/search?query=${encodedQuery}`;
-                    case 'yandex': return `https://yandex.com/maps/?text=${encodedQuery}`;
-                    case 'here': return `https://wego.here.com/search/${encodedQuery}`;
-                    default: return '';
-                }
+                if (mapPlat === 'google') return `https://www.google.com/maps/search/${encodeURIComponent(mapQue)}`;
+                if (mapPlat === 'waze') return `https://waze.com/ul?q=${encodeURIComponent(mapQue)}&navigate=yes`;
+                return '';
 
             case 'app':
                 const apPlat = document.getElementById('app-platform').value;
@@ -1792,7 +1723,6 @@ class QRGeneratorPro {
         const ssid = document.getElementById('wifi-ssid').value.trim();
         const password = document.getElementById('wifi-password').value.trim();
         const security = document.getElementById('wifi-security').value;
-        const isHidden = document.getElementById('wifi-hidden').checked;
 
         if (!ssid) return '';
 
@@ -1803,7 +1733,7 @@ class QRGeneratorPro {
             wifi += `P:${this.escapeWiFiString(password)};`;
         }
 
-        wifi += `H:${isHidden ? 'true' : 'false'};;`;
+        wifi += 'H:false;;'; // Hidden network: false
 
         console.log('Generated WiFi:', wifi);
         return wifi;
@@ -2192,23 +2122,14 @@ class QRGeneratorPro {
 
     generateMedical() {
         const name = document.getElementById('medical-name').value.trim();
-        const blood = document.getElementById('medical-blood').value;
-        const dob = document.getElementById('medical-dob').value;
+        const blood = document.getElementById('medical-blood').value.trim();
         const conditions = document.getElementById('medical-conditions').value.trim();
-        const contactName = document.getElementById('medical-contact-name').value.trim();
-        const contactPhone = document.getElementById('medical-contact-phone').value.trim();
 
         if (!name) return '';
 
         let info = `MEDICAL EMERGENCY INFO\nName: ${name}`;
-        if (dob) info += `\nDOB: ${dob}`;
         if (blood) info += `\nBlood Type: ${blood}`;
-        if (conditions) info += `\nConditions/Allergies: \n${conditions}`;
-        if (contactName || contactPhone) {
-            info += `\n\nEMERGENCY CONTACT:\n`;
-            if (contactName) info += `Name: ${contactName}\n`;
-            if (contactPhone) info += `Phone: ${contactPhone}`;
-        }
+        if (conditions) info += `\nConditions: ${conditions}`;
 
         return info;
     }
@@ -2586,7 +2507,7 @@ class QRGeneratorPro {
                     height: 32,
                     margin: 1,
                     color: {
-                        dark: '#ffffff',  // White QR code
+                        dark: '#0f172a',  // Dark QR code for light header
                         light: '#00000000'  // Transparent background
                     },
                     errorCorrectionLevel: 'H'  // High error correction for better scanning
@@ -2631,7 +2552,7 @@ class QRGeneratorPro {
     createFallbackHeaderQR(canvas) {
         // Create a simple QR-like pattern as fallback
         const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = '#0f172a';
         ctx.clearRect(0, 0, 32, 32);
 
         // Create a more detailed QR-like pattern (8x8 grid for 32px canvas)
@@ -2820,27 +2741,24 @@ class QRGeneratorPro {
 
         this.isGenerating = true;
 
-        // Ensure size is a valid integer (Clamped for performance and quality)
-        this.customization.size = parseInt(this.customization.size, 10) || 512;
-        if (this.customization.size < 256) this.customization.size = 256;
-        if (this.customization.size > 2000) this.customization.size = 2000;
-
         // Go directly to result page
         this.goToPage(4);
 
         // Wait for page transition to complete
         await new Promise(resolve => setTimeout(resolve, 100));
 
+        // Show appropriate animation based on type
+        if (this.selectedType === 'barcode') {
+            await this.showBarcodeAnimation();
+        } else {
+            await this.showSmoothBuildingAnimation();
+        }
+
         try {
-            if (this.selectedType === 'barcode') {
-                await this.showBarcodeAnimation();
-                await this.createQRCode();
-                await this.showSuccessAnimation();
-            } else {
-                // Build QR on a temp canvas first, then animate reveal
-                await this.showSmoothBuildingAnimation();
-                // Animation already handled canvas display, no need to call createQRCode again
-            }
+            // Animation completed, code is ready to be built
+
+            await this.createQRCode();
+            await this.showSuccessAnimation();
 
             // Save to history after successful generation
             this.saveToHistory(this.selectedType, this.qrData, this.getDisplayText());
@@ -3458,143 +3376,99 @@ class QRGeneratorPro {
     async showSmoothBuildingAnimation() {
         return new Promise(async (resolve) => {
             const container = document.querySelector('.qr-container');
-            if (!container) { resolve(); return; }
 
-            // First generate the actual QR code on a temp canvas
+            // First generate the actual QR code
             const tempCanvas = document.createElement('canvas');
-            const size = parseInt(this.customization.size, 10) || 512;
-            tempCanvas.width = size;
-            tempCanvas.height = size;
+            await this.generateQRToCanvas(tempCanvas);
 
-            const options = {
-                width: size,
-                height: size,
-                margin: 2,
-                color: {
-                    dark: this.customization.fgColor,
-                    light: this.customization.bgColor
-                },
-                errorCorrectionLevel: 'H'
-            };
-
-            await this.generateQRWithMethod(tempCanvas, this.qrData, options);
-
-            // Add logo if present
-            if (this.customization.logo) {
-                await this.addLogo(tempCanvas);
-            }
-
-            // ——— Phase 1: Show particle vortex animation ———
+            // Create assembling animation
             container.innerHTML = `
-                <div class="qr-gen-animation">
-                    <div class="qr-gen-orb">
-                        <div class="qr-gen-orb-ring ring-1"></div>
-                        <div class="qr-gen-orb-ring ring-2"></div>
-                        <div class="qr-gen-orb-ring ring-3"></div>
-                        <div class="qr-gen-orb-core"></div>
+                <div class="qr-assemble-animation">
+                    <div class="assemble-grid"></div>
+                    <div class="assemble-pieces">
+                        <!-- JS will inject pieces -->
                     </div>
-                    <div class="qr-gen-blocks" id="qr-gen-blocks"></div>
-                    <div class="qr-gen-status">
-                        <span class="qr-gen-status-text" id="qr-gen-status">Encoding data</span>
-                        <div class="qr-gen-progress">
-                            <div class="qr-gen-progress-fill" id="qr-gen-progress"></div>
-                        </div>
-                    </div>
+                    <div class="assemble-status">ASSEMBLING MODULES</div>
                 </div>
-                <canvas id="qr-canvas" style="display:none;"></canvas>
+                <canvas id="qr-canvas" style="display: none;"></canvas>
             `;
 
-            // Spawn flying QR module blocks
-            const blocksContainer = document.getElementById('qr-gen-blocks');
-            if (blocksContainer) {
-                for (let i = 0; i < 40; i++) {
-                    const block = document.createElement('div');
-                    block.className = 'qr-gen-block';
-                    const angle = (Math.PI * 2 * i) / 40;
-                    const radius = 100 + Math.random() * 80;
-                    block.style.setProperty('--start-x', `${Math.cos(angle) * radius}px`);
-                    block.style.setProperty('--start-y', `${Math.sin(angle) * radius}px`);
-                    block.style.setProperty('--delay', `${Math.random() * 0.6}s`);
-                    block.style.setProperty('--size', `${4 + Math.random() * 8}px`);
-                    block.style.setProperty('--hue', `${240 + Math.random() * 60}`);
-                    blocksContainer.appendChild(block);
-                }
-            }
-
-            // Animate status text and progress bar
-            const statusTexts = ['Encoding data', 'Building matrix', 'Applying styles', 'Rendering QR'];
-            const progressEl = document.getElementById('qr-gen-progress');
-            const statusEl = document.getElementById('qr-gen-status');
-
-            for (let i = 0; i < statusTexts.length; i++) {
-                if (statusEl) statusEl.textContent = statusTexts[i];
-                if (progressEl) progressEl.style.width = `${(i + 1) * 25}%`;
-                await new Promise(r => setTimeout(r, 400));
-            }
-
-            // ——— Phase 2: Collapse and morph into QR ———
-            const animEl = document.querySelector('.qr-gen-animation');
-            if (animEl) {
-                animEl.classList.add('qr-gen-collapse');
-            }
-            await new Promise(r => setTimeout(r, 700));
-
-            // ——— Phase 3: Reveal the actual QR code ———
-            container.innerHTML = '';
-
-            // Use the tempCanvas directly to save memory on mobile
-            tempCanvas.id = 'qr-canvas';
-            tempCanvas.className = 'qr-canvas-reveal';
-            tempCanvas.style.display = 'block'; // Ensure it's visible
-
-            container.appendChild(tempCanvas);
-            const canvas = tempCanvas;
-
-            // Trigger reveal animation with slightly more delay for mobile reliability
-            await new Promise(r => setTimeout(r, 100));
-            canvas.classList.add('qr-canvas-visible');
-
-            // Burst confetti particles
-            this.createRevealParticles(container);
-
-            // Show sparkle glow ring
-            const glowRing = document.createElement('div');
-            glowRing.className = 'qr-reveal-glow';
-            container.appendChild(glowRing);
-            await new Promise(r => setTimeout(r, 800));
-            if (glowRing.parentNode) glowRing.remove();
-
-            // Show action buttons with stagger
-            document.querySelectorAll('.action-btn').forEach((btn, i) => {
-                btn.style.opacity = '0';
-                btn.style.transform = 'translateY(20px)';
-                btn.style.transition = `all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) ${i * 0.1}s`;
-                setTimeout(() => {
-                    btn.style.opacity = '1';
-                    btn.style.transform = 'translateY(0)';
-                }, 50);
-            });
-
+            // Run the animation then reveal
+            await this.animateAssembleBuild(tempCanvas);
             resolve();
         });
     }
 
-    createRevealParticles(container) {
-        const colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#ffd700'];
-        for (let i = 0; i < 30; i++) {
+    async animateAssembleBuild(tempCanvas) {
+        const piecesContainer = document.querySelector('.assemble-pieces');
+        if (piecesContainer) {
+            // Create flying pieces
+            for (let i = 0; i < 20; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'qr-piece';
+                // Random starting positions outside center
+                const startX = (Math.random() - 0.5) * 400;
+                const startY = (Math.random() - 0.5) * 400;
+                piece.style.setProperty('--tx', `${startX}px`);
+                piece.style.setProperty('--ty', `${startY}px`);
+                piece.style.animationDelay = `${Math.random() * 0.5}s`;
+                piecesContainer.appendChild(piece);
+            }
+        }
+
+        // Wait for animation
+        await new Promise(r => setTimeout(r, 1500));
+
+        // Implode animation (pieces merge)
+        const animationEl = document.querySelector('.qr-assemble-animation');
+        if (animationEl) {
+            animationEl.style.transform = 'scale(0.8)';
+            animationEl.style.opacity = '0';
+        }
+
+        await new Promise(r => setTimeout(r, 600));
+
+        // Reveal canvas
+        const container = document.querySelector('.qr-container');
+        if (container && tempCanvas) {
+            container.innerHTML = '';
+            const canvas = document.createElement('canvas');
+            canvas.id = 'qr-canvas';
+            canvas.width = tempCanvas.width;
+            canvas.height = tempCanvas.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(tempCanvas, 0, 0);
+
+            canvas.style.maxWidth = '100%';
+            canvas.style.height = 'auto';
+            canvas.style.borderRadius = '16px';
+            canvas.style.boxShadow = '0 20px 60px rgba(0, 0, 0, 0.15)';
+            canvas.style.opacity = '0';
+            canvas.style.transform = 'scale(0.8)';
+            canvas.style.transition = 'all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)';
+
+            container.appendChild(canvas);
+
+            // Trigger reveal
+            await new Promise(r => setTimeout(r, 50));
+            canvas.style.opacity = '1';
+            canvas.style.transform = 'scale(1)';
+
+            // Add particles effect on reveal
+            this.createParticles(container);
+        }
+    }
+
+    createParticles(container) {
+        for (let i = 0; i < 15; i++) {
             const p = document.createElement('div');
             p.className = 'reveal-particle';
-            const angle = (Math.PI * 2 * i) / 30;
-            const dist = 60 + Math.random() * 140;
-            p.style.setProperty('--px', `${Math.cos(angle) * dist}px`);
-            p.style.setProperty('--py', `${Math.sin(angle) * dist}px`);
-            p.style.setProperty('--color', colors[Math.floor(Math.random() * colors.length)]);
-            p.style.setProperty('--size', `${3 + Math.random() * 6}px`);
-            p.style.setProperty('--delay', `${Math.random() * 0.3}s`);
             p.style.left = '50%';
             p.style.top = '50%';
+            p.style.setProperty('--x', (Math.random() - 0.5) * 200 + 'px');
+            p.style.setProperty('--y', (Math.random() - 0.5) * 200 + 'px');
             container.appendChild(p);
-            setTimeout(() => { if (p.parentNode) p.remove(); }, 1200);
+            setTimeout(() => p.remove(), 1000);
         }
     }
 
@@ -3989,6 +3863,7 @@ class QRGeneratorPro {
     async showSuccessAnimation() {
         return new Promise((resolve) => {
             const container = document.querySelector('.qr-container');
+            const creationDiv = container.querySelector('.qr-creation-animation');
             const canvas = document.getElementById('qr-canvas');
 
             if (!canvas) {
@@ -3997,37 +3872,33 @@ class QRGeneratorPro {
                 return;
             }
 
-            // Remove any leftover animation elements
-            const creationDiv = container ? container.querySelector('.qr-creation-animation') : null;
-            if (creationDiv) creationDiv.remove();
-            const genAnim = container ? container.querySelector('.qr-gen-animation') : null;
-            if (genAnim) genAnim.remove();
+            // Remove creation animation immediately
+            if (creationDiv) {
+                creationDiv.remove();
+            }
 
-            // Show canvas
+            // Show canvas completely stable - no animations
             canvas.style.display = 'block';
             canvas.style.opacity = '1';
             canvas.style.transform = 'none';
+            canvas.style.transition = 'none';
             canvas.style.position = 'static';
             canvas.style.margin = '0 auto';
-            canvas.style.maxWidth = '100%';
-            canvas.style.maxHeight = '400px';
-            canvas.style.height = 'auto';
-            canvas.style.borderRadius = '14px';
+            canvas.style.animation = 'none';
 
-            // Show action buttons with stagger
-            document.querySelectorAll('.action-btn').forEach((btn, i) => {
+            // Show action buttons immediately without any animation
+            document.querySelectorAll('.action-btn').forEach((btn) => {
                 btn.style.display = 'flex';
-                btn.style.opacity = '0';
-                btn.style.transform = 'translateY(16px)';
-                btn.style.transition = `all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) ${i * 0.08}s`;
-                setTimeout(() => {
-                    btn.style.opacity = '1';
-                    btn.style.transform = 'translateY(0)';
-                }, 50);
+                btn.style.opacity = '1';
+                btn.style.transform = 'none';
+                btn.style.transition = 'none';
+                btn.style.animation = 'none';
             });
 
-            // Burst particles for barcode success too
-            if (container) this.createRevealParticles(container);
+            // Ensure container is completely stable
+            container.style.transform = 'none';
+            container.style.transition = 'none';
+            container.style.animation = 'none';
 
             resolve();
         });
@@ -4098,15 +3969,15 @@ class QRGeneratorPro {
         this.appSettings = JSON.parse(localStorage.getItem('qr-app-settings')) || {
             highQuality: true,
             autoDownload: false,
-            defaultSize: 512,
+            defaultSize: 3000,
             defaultFg: '#000000',
             defaultBg: '#ffffff',
             errorCorrection: 'M'
         };
 
         // Clamp stored size to new range
-        if (this.appSettings.defaultSize < 300) this.appSettings.defaultSize = 300;
-        if (this.appSettings.defaultSize > 3000) this.appSettings.defaultSize = 3000;
+        if (this.appSettings.defaultSize < 3000) this.appSettings.defaultSize = 3000;
+        if (this.appSettings.defaultSize > 8000) this.appSettings.defaultSize = 8000;
         this.customization.size = this.appSettings.defaultSize;
 
         // 1) High Quality Setting (Replacing Grid Columns)
@@ -4136,16 +4007,14 @@ class QRGeneratorPro {
             sizeSlider.value = this.appSettings.defaultSize;
             sizeVal.textContent = this.appSettings.defaultSize + 'px';
             sizeSlider.addEventListener('input', (e) => {
-                const parsed = parseInt(e.target.value, 10);
-                if (isNaN(parsed)) return;
-                this.appSettings.defaultSize = parsed;
-                sizeVal.textContent = parsed + 'px';
+                this.appSettings.defaultSize = parseInt(e.target.value);
+                sizeVal.textContent = e.target.value + 'px';
                 // Sync with the customization size slider on page 3
                 const custSlider = document.getElementById('size-slider');
                 const custVal = document.getElementById('size-value');
-                if (custSlider) { custSlider.value = parsed; }
-                if (custVal) { custVal.textContent = parsed + 'px'; }
-                this.customization.size = parsed;
+                if (custSlider) { custSlider.value = e.target.value; }
+                if (custVal) { custVal.textContent = e.target.value + 'px'; }
+                this.customization.size = parseInt(e.target.value);
                 this.saveSettings();
             });
         }
