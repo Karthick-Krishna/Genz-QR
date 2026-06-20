@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Generator Pro</title>
+    <title>CoralGenZ QR</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
@@ -155,7 +155,7 @@
                 <div class="logo">
                     <canvas id="header-qr" width="32" height="32"
                         title="Scan to visit coralgenz.wordpress.com"></canvas>
-                    <span>GenZ QR</span>
+                    <span>CoralGenZ QR</span>
                     <!-- History Toggle Button -->
                     <button class="history-toggle-btn-header" id="history-toggle-btn" onclick="toggleHistoryPanel()"
                         title="View History">
@@ -321,21 +321,32 @@
                         <h3>Skype</h3>
                         <p>Voice/Video Call</p>
                     </div>
+                    <div class="type-card" data-type="vb" data-keywords="viber message chat call communication">
+                        <div class="type-icon"><i class="fab fa-viber"></i></div>
+                        <h3>Viber</h3>
+                        <p>Chat/Call</p>
+                    </div>
                     <div class="type-card" data-type="ft" data-keywords="facetime video call apple ios iphone ipad mac">
                         <div class="type-icon"><i class="fas fa-video"></i></div>
                         <h3>Facetime</h3>
                         <p>Video Call</p>
+                    </div>
+                    <div class="type-card" data-type="fta" data-keywords="facetime audio call apple ios iphone ipad mac">
+                        <div class="type-icon"><i class="fas fa-phone-alt"></i></div>
+                        <h3>Facetime Audio</h3>
+                        <p>Audio Call</p>
                     </div>
                     <div class="type-card" data-type="zm" data-keywords="zoom meeting video conference call link">
                         <div class="type-icon"><i class="fas fa-video"></i></div>
                         <h3>Zoom</h3>
                         <p>Meeting link</p>
                     </div>
-                    <div class="type-card" data-type="discord" data-keywords="discord server gaming chat community invite">
-                        <div class="type-icon"><i class="fab fa-discord"></i></div>
-                        <h3>Discord</h3>
-                        <p>Server invite</p>
+                    <div class="type-card" data-type="wx" data-keywords="webex meeting video conference call link">
+                        <div class="type-icon"><i class="fas fa-video"></i></div>
+                        <h3>Webex</h3>
+                        <p>Meeting link</p>
                     </div>
+
                     <div class="type-card" data-type="social" data-keywords="social media profile links instagram facebook">
                         <div class="type-icon"><i class="fas fa-share-alt"></i></div>
                         <h3>Social Links</h3>
@@ -380,11 +391,7 @@
                         <h3>Donate</h3>
                         <p>Support link</p>
                     </div>
-                    <div class="type-card" data-type="coupon" data-keywords="coupon promo discount deal offer save sale">
-                        <div class="type-icon"><i class="fas fa-ticket-alt"></i></div>
-                        <h3>Coupon</h3>
-                        <p>Promo code</p>
-                    </div>
+
                 </div>
 
                 <h2 class="sector-title" data-category="apps">App & Links</h2>
@@ -404,40 +411,12 @@
                         <h3>Spotify</h3>
                         <p>Music Link</p>
                     </div>
-                    <div class="type-card" data-type="im" data-keywords="imdb movie app link film database actor title">
-                        <div class="type-icon"><i class="fas fa-film"></i></div>
-                        <h3>IMDb</h3>
-                        <p>Movie/Actor</p>
-                    </div>
-                    <div class="type-card" data-type="yl" data-keywords="yelp app business query restaurant review local">
-                        <div class="type-icon"><i class="fab fa-yelp"></i></div>
-                        <h3>Yelp</h3>
-                        <p>Place/Review</p>
-                    </div>
+
                 </div>
 
                 <h2 class="sector-title" data-category="tech">Developer & Tech</h2>
                 <div class="type-grid" data-category="tech">
-                    <div class="type-card" data-type="developer" data-keywords="code repository github gitlab development programming">
-                        <div class="type-icon"><i class="fab fa-github"></i></div>
-                        <h3>Git Repo</h3>
-                        <p>Code project</p>
-                    </div>
-                    <div class="type-card" data-type="serverinfo" data-keywords="server ip port ssh login credentials host">
-                        <div class="type-icon"><i class="fas fa-server"></i></div>
-                        <h3>Server Info</h3>
-                        <p>Host details</p>
-                    </div>
-                    <div class="type-card" data-type="sshkey" data-keywords="ssh key public security access developer rsa">
-                        <div class="type-icon"><i class="fas fa-key"></i></div>
-                        <h3>SSH Key</h3>
-                        <p>Public Key</p>
-                    </div>
-                    <div class="type-card" data-type="docker" data-keywords="docker container image devops kubernetes hub">
-                        <div class="type-icon"><i class="fab fa-docker"></i></div>
-                        <h3>Docker Hub</h3>
-                        <p>Image Link</p>
-                    </div>
+
                     <div class="type-card" data-type="totp" data-keywords="totp 2fa authenticator security two factor auth">
                         <div class="type-icon"><i class="fas fa-shield-alt"></i></div>
                         <h3>TOTP 2FA</h3>
@@ -457,6 +436,51 @@
                         <h3>Medical Info</h3>
                         <p>Emergency Card</p>
                     </div>
+                    <div class="type-card" data-type="health_insurance" data-keywords="health insurance card medical provider member">
+                        <div class="type-icon"><i class="fas fa-file-medical"></i></div>
+                        <h3>Health Insurance</h3>
+                        <p>Insurance Card</p>
+                    </div>
+                    <div class="type-card" data-type="vaccine" data-keywords="vaccine vaccination record covid immunization shot">
+                        <div class="type-icon"><i class="fas fa-syringe"></i></div>
+                        <h3>Vaccine Record</h3>
+                        <p>Immunization</p>
+                    </div>
+                    <div class="type-card" data-type="allergy_alert" data-keywords="allergy allergies reaction medical safety emergency food drug latex insect epipen">
+                        <div class="type-icon"><i class="fas fa-allergies"></i></div>
+                        <h3>Allergy Alert</h3>
+                        <p>Medical Warning</p>
+                    </div>
+                    <div class="type-card" data-type="medication_tracker" data-keywords="medication medicine schedule dose prescription tracking health pills details frequency">
+                        <div class="type-icon"><i class="fas fa-pills"></i></div>
+                        <h3>Med Schedule</h3>
+                        <p>Daily Dosage</p>
+                    </div>
+                    <div class="type-card" data-type="ice_contacts" data-keywords="ice emergency contact phone number parents family spouse relative call contact person details">
+                        <div class="type-icon"><i class="fas fa-phone-alt"></i></div>
+                        <h3>ICE Contacts</h3>
+                        <p>Emergency Contacts</p>
+                    </div>
+                    <div class="type-card" data-type="blood_donor" data-keywords="blood donor donation group type donor card plasma save life center blood bank">
+                        <div class="type-icon"><i class="fas fa-tint"></i></div>
+                        <h3>Blood Donor</h3>
+                        <p>Donor Profile</p>
+                    </div>
+                    <div class="type-card" data-type="vision_rx" data-keywords="vision prescription glasses contacts optometrist sphere cylinder axis pd eye eyewear rx">
+                        <div class="type-icon"><i class="fas fa-glasses"></i></div>
+                        <h3>Vision Rx</h3>
+                        <p>Eyewear Prescription</p>
+                    </div>
+                    <div class="type-card" data-type="pet_medical" data-keywords="pet medical animal vet veterinarian vaccination dog cat chip health record puppy microchip">
+                        <div class="type-icon"><i class="fas fa-paw"></i></div>
+                        <h3>Pet Health</h3>
+                        <p>Pet Medical Card</p>
+                    </div>
+                    <div class="type-card" data-type="advance_directive" data-keywords="advance directive dnr living will healthcare proxy medical consent legal request status">
+                        <div class="type-icon"><i class="fas fa-file-contract"></i></div>
+                        <h3>Living Will / DNR</h3>
+                        <p>Advance Directive</p>
+                    </div>
                     <div class="type-card" data-type="idcard" data-keywords="id card license registration member identity badge">
                         <div class="type-icon"><i class="fas fa-id-badge"></i></div>
                         <h3>ID Card</h3>
@@ -467,133 +491,211 @@
                         <h3>MeCard</h3>
                         <p>Simple contact</p>
                     </div>
-                    <div class="type-card" data-type="secret" data-keywords="secret note hidden text private message encrypted">
-                        <div class="type-icon"><i class="fas fa-user-secret"></i></div>
-                        <h3>Secret Note</h3>
-                        <p>Private msg</p>
+                    
+                    <!-- NEW FEATURES (20) -->
+                    <div class="type-card" data-type="home_inventory" data-keywords="home inventory house list items serial value">
+                        <div class="type-icon"><i class="fas fa-boxes"></i></div>
+                        <h3>Home Inventory</h3>
+                        <p>Track household items</p>
                     </div>
-                    <div class="type-card" data-type="book" data-keywords="book isbn search library reading literature author">
-                        <div class="type-icon"><i class="fas fa-book"></i></div>
-                        <h3>Book Search</h3>
-                        <p>ISBN link</p>
+                    <div class="type-card" data-type="pantry_tracker" data-keywords="pantry tracker food expiry groceries">
+                        <div class="type-icon"><i class="fas fa-apple-alt"></i></div>
+                        <h3>Pantry Tracker</h3>
+                        <p>Food expiry dates</p>
                     </div>
+                    <div class="type-card" data-type="spare_key" data-keywords="spare key location hide lockbox safe">
+                        <div class="type-icon"><i class="fas fa-key"></i></div>
+                        <h3>Spare Key</h3>
+                        <p>Key location & instructions</p>
+                    </div>
+                    <div class="type-card" data-type="recipe_card" data-keywords="recipe food cook kitchen meal steps">
+                        <div class="type-icon"><i class="fas fa-utensils"></i></div>
+                        <h3>Recipe Card</h3>
+                        <p>Cooking instructions</p>
+                    </div>
+                    <div class="type-card" data-type="meal_planner" data-keywords="meal planner weekly food calendar">
+                        <div class="type-icon"><i class="fas fa-calendar-day"></i></div>
+                        <h3>Meal Planner</h3>
+                        <p>Weekly schedule</p>
+                    </div>
+                    <div class="type-card" data-type="wardrobe_storage" data-keywords="wardrobe seasonal storage clothes box">
+                        <div class="type-icon"><i class="fas fa-tshirt"></i></div>
+                        <h3>Wardrobe Storage</h3>
+                        <p>Seasonal clothing log</p>
+                    </div>
+                    <div class="type-card" data-type="plant_care" data-keywords="plant care garden water flower sunlight">
+                        <div class="type-icon"><i class="fas fa-leaf"></i></div>
+                        <h3>Plant Care</h3>
+                        <p>Water & sunlight info</p>
+                    </div>
+                    <div class="type-card" data-type="bike_maintenance" data-keywords="bike bicycle maintenance service tire log">
+                        <div class="type-icon"><i class="fas fa-bicycle"></i></div>
+                        <h3>Bike Maintenance</h3>
+                        <p>Service log & specs</p>
+                    </div>
+                    <div class="type-card" data-type="car_maintenance" data-keywords="car maintenance auto vin oil tire service">
+                        <div class="type-icon"><i class="fas fa-car"></i></div>
+                        <h3>Car Maintenance</h3>
+                        <p>VIN & service info</p>
+                    </div>
+                    <div class="type-card" data-type="wifi_extender" data-keywords="wifi extender repeater network admin router">
+                        <div class="type-icon"><i class="fas fa-broadcast-tower"></i></div>
+                        <h3>Wi-Fi Extender</h3>
+                        <p>Network setup details</p>
+                    </div>
+                    <div class="type-card" data-type="alarm_code" data-keywords="home security alarm code safe lock pin">
+                        <div class="type-icon"><i class="fas fa-shield-alt"></i></div>
+                        <h3>Security Alarm</h3>
+                        <p>Codes & instructions</p>
+                    </div>
+                    <div class="type-card" data-type="gym_routine" data-keywords="gym workout fitness routine weights exercise">
+                        <div class="type-icon"><i class="fas fa-dumbbell"></i></div>
+                        <h3>Gym Routine</h3>
+                        <p>Workout splits & sets</p>
+                    </div>
+                    <div class="type-card" data-type="bp_log" data-keywords="blood pressure health log pulse medical">
+                        <div class="type-icon"><i class="fas fa-heartbeat"></i></div>
+                        <h3>BP Log</h3>
+                        <p>Blood pressure record</p>
+                    </div>
+                    <div class="type-card" data-type="vitamin_schedule" data-keywords="vitamin supplement pill daily routine">
+                        <div class="type-icon"><i class="fas fa-capsules"></i></div>
+                        <h3>Vitamin Schedule</h3>
+                        <p>Daily supplement doses</p>
+                    </div>
+                    <div class="type-card" data-type="bedtime_routine" data-keywords="sleep bedtime hygiene night rest routine">
+                        <div class="type-icon"><i class="fas fa-bed"></i></div>
+                        <h3>Bedtime Routine</h3>
+                        <p>Sleep hygiene schedule</p>
+                    </div>
+                    <div class="type-card" data-type="habit_tracker" data-keywords="habit tracker daily goals self improvement">
+                        <div class="type-icon"><i class="fas fa-check-square"></i></div>
+                        <h3>Habit Tracker</h3>
+                        <p>Daily goal checklist</p>
+                    </div>
+                    <div class="type-card" data-type="budget_tracker" data-keywords="budget finance tracker money monthly spending">
+                        <div class="type-icon"><i class="fas fa-wallet"></i></div>
+                        <h3>Budget Tracker</h3>
+                        <p>Monthly spending goals</p>
+                    </div>
+                    <div class="type-card" data-type="evac_route" data-keywords="evacuation emergency fire escape route meeting">
+                        <div class="type-icon"><i class="fas fa-running"></i></div>
+                        <h3>Evacuation Route</h3>
+                        <p>Emergency plan</p>
+                    </div>
+                    <div class="type-card" data-type="office_visitor" data-keywords="office visitor conference guest room info">
+                        <div class="type-icon"><i class="fas fa-building"></i></div>
+                        <h3>Office Visitor Info</h3>
+                        <p>Desk & guest Wi-Fi</p>
+                    </div>
+                    <div class="type-card" data-type="project_board" data-keywords="project task status milestone deadline kanban">
+                        <div class="type-icon"><i class="fas fa-clipboard-list"></i></div>
+                        <h3>Project Status</h3>
+                        <p>Task & milestone board</p>
+                    </div>
+
                 </div>
             </div>
         </div>
 
-        <!-- Page 2: Data Input -->
+        <!-- Page 2: Editor (Data, Customization, Preview) -->
         <div class="page" id="page-2">
-            <div class="page-content">
+            <div class="page-content editor-layout">
                 <div class="page-header">
                     <button class="back-btn" onclick="goToPage(1)">
                         <i class="fas fa-arrow-left"></i>
                     </button>
-                    <h1 id="input-title">Enter Data</h1>
-                    <p id="input-subtitle">Fill in the information below</p>
+                    <h1 id="input-title">Create QR Code</h1>
+                    <p id="input-subtitle">Enter your data and customize</p>
                 </div>
 
-                <div class="input-container" id="input-container">
-                    <!-- Dynamic content will be inserted here -->
-                </div>
+                <div class="editor-grid">
+                    <!-- 1. Data Input -->
+                    <div class="editor-section">
+                        <h2 class="editor-section-title">1. Enter Data</h2>
+                        <div class="input-container" id="input-container">
+                            <!-- Dynamic content will be inserted here -->
+                        </div>
+                    </div>
 
-                <button class="next-btn" id="customize-btn" onclick="goToPage(3)">
-                    <span id="customize-btn-text">Customize QR</span>
-                    <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
+                    <!-- 2. Live Preview and Actions -->
+                    <div class="editor-preview">
+                        <div class="editor-preview-sticky">
+                            <h2 class="editor-section-title">Live Preview</h2>
+                            <div class="qr-result">
+                                <div class="qr-container">
+                                    <canvas id="qr-canvas"></canvas>
+                                </div>
 
-        <!-- Page 3: Customization -->
-        <div class="page" id="page-3">
-            <div class="page-content">
-                <div class="page-header">
-                    <button class="back-btn" onclick="goToPage(2)">
-                        <i class="fas fa-arrow-left"></i>
-                    </button>
-                    <h1 id="customize-title">Customize QR Code</h1>
-                    <p id="customize-subtitle">Choose style and appearance</p>
-                </div>
-
-                <div class="customization-section">
-
-
-                    <div class="option-group" id="color-option-group">
-                        <label>Colors</label>
-                        <div class="color-options">
-                            <div class="color-row">
-                                <span>Foreground:</span>
-                                <input type="color" id="fg-color" value="#000000">
-                            </div>
-                            <div class="color-row">
-                                <span>Background:</span>
-                                <input type="color" id="bg-color" value="#ffffff">
+                                <div class="result-actions">
+                                    <button class="action-btn primary" onclick="downloadQR()">
+                                        <i class="fas fa-download"></i>
+                                        <span>Download</span>
+                                    </button>
+                                    <button class="action-btn" onclick="shareQR()" id="share-btn">
+                                        <i class="fas fa-share"></i>
+                                        <span>Share</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="option-group" id="logo-option-group">
-                        <label>Center Logo</label>
-                        <div class="logo-upload">
-                            <input type="file" id="logo-upload" accept="image/*" style="display: none;">
-                            <button class="upload-btn" onclick="document.getElementById('logo-upload').click()">
-                                <i class="fas fa-upload"></i>
-                                <span>Upload Logo</span>
-                            </button>
-                            <div class="logo-preview" id="logo-preview" style="display: none;">
-                                <img id="logo-img" src="" alt="Logo">
-                                <button class="remove-logo" onclick="removeLogo()">
-                                    <i class="fas fa-times"></i>
-                                </button>
+                    <!-- 3. Customization -->
+                    <div class="editor-section">
+                        <h2 class="editor-section-title">2. Customize</h2>
+                        <div class="customization-section">
+                            <div class="option-group" id="color-option-group">
+                                <label>Colors</label>
+                                <div class="color-options">
+                                    <div class="color-row">
+                                        <span>Foreground:</span>
+                                        <input type="color" id="fg-color" value="#000000">
+                                    </div>
+                                    <div class="color-row">
+                                        <span>Background:</span>
+                                        <input type="color" id="bg-color" value="#ffffff">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="option-group" id="logo-option-group">
+                                <label>Center Logo</label>
+                                <div class="logo-upload">
+                                    <input type="file" id="logo-upload" accept="image/*" style="display: none;">
+                                    <button class="upload-btn" onclick="document.getElementById('logo-upload').click()">
+                                        <i class="fas fa-upload"></i>
+                                        <span>Upload Logo</span>
+                                    </button>
+                                    <div class="logo-preview" id="logo-preview" style="display: none;">
+                                        <img id="logo-img" src="" alt="Logo">
+                                        <button class="remove-logo" onclick="removeLogo()">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <p class="help-text" style="font-size: 0.8rem; color: #666; margin-top: 5px;">Note: Mutually exclusive with Serial Number.</p>
+                            </div>
+
+                            <div class="option-group" id="serial-option-group">
+                                <label>Center Serial Number</label>
+                                <div class="serial-input-container" style="display: flex; gap: 10px;">
+                                    <input type="text" id="serial-number-input" placeholder="e.g. SN-12345" maxlength="15" style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+                                    <button class="remove-logo" id="clear-serial-btn" style="display: none; padding: 0 15px; border-radius: 8px; border: none; background: #ff4757; color: white; cursor: pointer;">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <p class="help-text" style="font-size: 0.8rem; color: #666; margin-top: 5px;">Note: Mutually exclusive with Logo.</p>
+                            </div>
+
+                            <div class="option-group" id="size-option-group">
+                                <label>Quality</label>
+                                <div class="size-slider">
+                                    <input type="range" id="size-slider" min="500" max="3000" step="100" value="1000">
+                                    <span id="size-value">1000px</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="option-group" id="size-option-group">
-                        <label>Quality</label>
-                        <div class="size-slider">
-                            <input type="range" id="size-slider" min="3000" max="8000" step="500" value="3000">
-                            <span id="size-value">3000px</span>
-                        </div>
-                    </div>
-                </div>
-
-                <button class="generate-btn" id="generate-btn" onclick="generateQR()">
-                    <i class="fas fa-magic"></i>
-                    <span id="generate-btn-text">Generate QR Code</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- Page 4: Result -->
-        <div class="page" id="page-4">
-            <div class="page-content">
-                <div class="page-header">
-                    <button class="back-btn" onclick="goToPage(3)">
-                        <i class="fas fa-arrow-left"></i>
-                    </button>
-                    <h1 id="result-title">Your QR Code</h1>
-                    <p id="result-subtitle">Ready to download and share</p>
-                </div>
-
-                <div class="qr-result">
-                    <div class="qr-container">
-                        <canvas id="qr-canvas"></canvas>
-                    </div>
-
-                    <div class="result-actions">
-                        <button class="action-btn primary" onclick="downloadQR()">
-                            <i class="fas fa-download"></i>
-                            <span>Download</span>
-                        </button>
-                        <button class="action-btn" onclick="shareQR()" id="share-btn">
-                            <i class="fas fa-share"></i>
-                            <span>Share</span>
-                        </button>
-
-                        <button class="action-btn" id="new-code-btn" onclick="goToPage(1)">
-                            <i class="fas fa-plus"></i>
-                            <span id="new-code-btn-text">New QR</span>
-                        </button>
                     </div>
                 </div>
             </div>
