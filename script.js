@@ -1023,10 +1023,17 @@ class QRGeneratorPro {
                 subtitle.textContent = 'Create product barcode';
                 html = `
                     <div class="form-group">
+                        <label for="barcode-data">Barcode Data *</label>
+                        <input type="text" id="barcode-data" class="form-input" placeholder="Enter barcode number or text" required>
+                    </div>
+                    <div class="form-group">
                         <label for="barcode-format">Barcode Format *</label>
                         <select id="barcode-format" class="form-input">
                             <option value="CODE128">Code 128 (General)</option>
                             <option value="EAN13">EAN-13 (Products)</option>
+                            <option value="UPC">UPC (Products)</option>
+                        </select>
+                    </div>
                     <div class="form-group">
                         <label for="barcode-text">Display Text (Optional)</label>
                         <input type="text" id="barcode-text" class="form-input" placeholder="Custom text below barcode">
