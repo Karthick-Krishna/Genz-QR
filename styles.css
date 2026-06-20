@@ -928,10 +928,19 @@ body {
 }
 
 .type-card[data-type="medical"] .type-icon {
-  background: linear-gradient(135deg, #dc2626, #f87171);
+  background: linear-gradient(135deg, #e11d48, #be123c);
   color: white;
-  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4);
+  box-shadow: 0 8px 20px rgba(225, 29, 72, 0.4);
 }
+.type-card[data-type="health_insurance"] .type-icon { background: linear-gradient(135deg, #0ea5e9, #0369a1); color: white; box-shadow: 0 8px 20px rgba(14, 165, 233, 0.4); }
+.type-card[data-type="vaccine"] .type-icon { background: linear-gradient(135deg, #10b981, #047857); color: white; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4); }
+.type-card[data-type="allergy_alert"] .type-icon { background: linear-gradient(135deg, #f59e0b, #b45309); color: white; box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4); }
+.type-card[data-type="medication_tracker"] .type-icon { background: linear-gradient(135deg, #8b5cf6, #5b21b6); color: white; box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4); }
+.type-card[data-type="ice_contacts"] .type-icon { background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4); }
+.type-card[data-type="blood_donor"] .type-icon { background: linear-gradient(135deg, #dc2626, #991b1b); color: white; box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4); }
+.type-card[data-type="vision_rx"] .type-icon { background: linear-gradient(135deg, #06b6d4, #0e7490); color: white; box-shadow: 0 8px 20px rgba(6, 182, 212, 0.4); }
+.type-card[data-type="pet_medical"] .type-icon { background: linear-gradient(135deg, #d946ef, #a21caf); color: white; box-shadow: 0 8px 20px rgba(217, 70, 239, 0.4); }
+.type-card[data-type="advance_directive"] .type-icon { background: linear-gradient(135deg, #64748b, #334155); color: white; box-shadow: 0 8px 20px rgba(100, 116, 139, 0.4); }
 
 .type-card[data-type="paypal"] .type-icon {
   background: linear-gradient(135deg, #003087, #0079c1);
@@ -1262,7 +1271,7 @@ select.form-input {
   width: 100%;
   padding: 18px 22px;
   background: var(--bg-main);
-  border: 1px solid var(--border-light);
+  border: 2px solid transparent;
   border-radius: var(--radius-md);
   font-size: 15px;
   font-weight: 500;
@@ -2805,7 +2814,7 @@ input:checked+.toggle-slider::before {
   padding: 32px;
   box-shadow: var(--shadow-sm);
   margin-bottom: 24px;
-  border: 2px solid var(--border-light);
+  border: 2px solid rgba(0, 0, 0, 0.15);
 }
 
 .editor-section-title {
@@ -2825,7 +2834,7 @@ input:checked+.toggle-slider::before {
   border-radius: var(--radius-xl);
   padding: 32px;
   box-shadow: var(--shadow-sm);
-  border: 2px solid var(--border-light);
+  border: 2px solid rgba(0, 0, 0, 0.15);
 }
 
 /* Ensure the live preview result is always visible and looks good */
