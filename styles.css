@@ -2741,7 +2741,34 @@ input:checked+.toggle-slider::before {
   }
 
   .qr-container {
-    padding: 28px;
+    padding: 24px;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-input,
+  .form-textarea,
+  select.form-input {
+    padding: 14px 16px;
+    font-size: 14px;
+  }
+
+  .form-group label {
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+
+  .editor-section,
+  .editor-preview-sticky {
+    padding: 24px 16px;
+    margin-bottom: 16px;
+  }
+
+  .editor-section-title {
+    font-size: 1.1rem;
+    margin-bottom: 16px;
   }
 }
 
