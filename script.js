@@ -667,9 +667,6 @@ class QRGeneratorPro {
     goToPage(pageNumber) {
         if (pageNumber > 2) return; // Only 2 pages exist in the new unified editor
 
-        // Scroll to top of the page immediately to show Data Entry on mobile
-        window.scrollTo(0, 0);
-
         // Hide current page
         document.querySelectorAll('.page').forEach(page => {
             page.classList.remove('active');
@@ -682,6 +679,7 @@ class QRGeneratorPro {
         this.updateProgress();
         this.updatePageIndicator();
         this.ensureLogoColor(); // Ensure logo stays white
+        window.scrollTo({ top: 0, behavior: 'smooth' });
 
         // Setup page content
         if (pageNumber === 1) {
