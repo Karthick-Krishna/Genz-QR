@@ -41,8 +41,9 @@ class QRGeneratorPro {
             cornerStyle: 'default',
             fgColor: '#000000',
             bgColor: '#ffffff',
-            size: 3000,
-            logo: null
+            size: 1000,
+            logo: null,
+            serialNumber: null
         };
         this.history = this.loadHistory();
         this.isGenerating = false;
@@ -263,6 +264,31 @@ class QRGeneratorPro {
             });
         }
 
+        // Serial Number
+        const serialInput = document.getElementById('serial-number-input');
+        const clearSerialBtn = document.getElementById('clear-serial-btn');
+        if (serialInput) {
+            serialInput.addEventListener('input', (e) => {
+                this.customization.serialNumber = e.target.value.trim();
+                if (this.customization.serialNumber) {
+                    if (clearSerialBtn) clearSerialBtn.style.display = 'block';
+                    if (this.customization.logo) this.removeLogo();
+                } else {
+                    if (clearSerialBtn) clearSerialBtn.style.display = 'none';
+                }
+                clearTimeout(this.livePreviewTimeout);
+                this.livePreviewTimeout = setTimeout(() => this.generateLiveQR(), 300);
+            });
+        }
+        if (clearSerialBtn) {
+            clearSerialBtn.addEventListener('click', () => {
+                if (serialInput) serialInput.value = '';
+                this.customization.serialNumber = null;
+                clearSerialBtn.style.display = 'none';
+                this.generateLiveQR();
+            });
+        }
+
 
 
         // Optimize scroll performance
@@ -293,9 +319,12 @@ class QRGeneratorPro {
 
     initSearchAndFilter() {
         this.categoryMappings = {
-            'essentials': ['text', 'url', 'wifi', 'contact', 'location'],
-            'social': ['email', 'phone', 'sms', 'wa', 'yt', 'social'],
-            'finance': ['upi', 'paypal']
+            'essentials': ['text', 'url', 'wifi', 'contact', 'location', 'phone', 'sms', 'email', 'event', 'barcode'],
+            'social': ['wa', 'tg', 'sk', 'vb', 'ft', 'fta', 'zm', 'wx', 'social', 'linkedin', 'portfolio', 'yt'],
+            'finance': ['upi', 'paypal', 'crypto', 'donate'],
+            'apps': ['maps', 'app', 'sp'],
+            'tech': ['totp', 'prompt'],
+            'personal': ['medical', 'health_insurance', 'vaccine', 'allergy_alert', 'medication_tracker', 'ice_contacts', 'blood_donor', 'vision_rx', 'pet_medical', 'advance_directive', 'idcard', 'mecard']
         };
 
         // Define search keywords for each type
@@ -314,12 +343,19 @@ class QRGeneratorPro {
             'portfolio': 'portfolio cv resume website personal projects showcase work',
             'idcard': 'id card license registration member identity credential badge',
             'medical': 'medical emergency health doctor hospital blood group condition allergy',
+            'health_insurance': 'health insurance card medical provider member group policy plan',
+            'vaccine': 'vaccine vaccination record covid immunization shot batch date clinic',
+            'allergy_alert': 'allergy allergies reaction medical safety emergency food drug latex insect epipen',
+            'medication_tracker': 'medication medicine schedule dose prescription tracking health pills details frequency',
+            'ice_contacts': 'ice emergency contact phone number parents family spouse relative call contact person details',
+            'blood_donor': 'blood donor donation group type donor card plasma save life center blood bank',
+            'vision_rx': 'vision prescription glasses contacts optometrist sphere cylinder axis pd eye eyewear rx',
+            'pet_medical': 'pet medical animal vet veterinarian vaccination dog cat chip health record puppy microchip',
+            'advance_directive': 'advance directive dnr living will healthcare proxy medical consent legal request status',
             'paypal': 'paypal payment money transfer online cash invoice',
             'upi': 'upi payment india rupee money transfer gpay paytm phonepe',
             'crypto': 'crypto bitcoin wallet cryptocurrency blockchain eth btc sol usdt',
             'donate': 'donation patreon kofi support funding charity help money',
-            'coupon': 'coupon promo discount deal offer save sale voucher',
-            'barcode': 'barcode scanner format product code ean upc 128 inventory',
             'social': 'social media profile links instagram facebook twitter tiktok snapchat',
             'wa': 'whatsapp message chat direct communication phone mobile',
             'tg': 'telegram message chat direct communication username messenger',
@@ -327,30 +363,17 @@ class QRGeneratorPro {
             'sk': 'skype call video chat communication username voice',
             'ft': 'facetime video call apple ios iphone ipad mac',
             'fta': 'facetime audio call apple ios voice iphone ipad mac',
-            'discord': 'discord server gaming chat community invite channel',
             'meeting': 'meeting conference call video standard teams meet zoom',
             'zm': 'zoom meeting video conference call link online session',
             'wx': 'webex meeting video conference call cisco remote work',
-            'developer': 'code repository github gitlab development programming git repo opensource',
-            'sshkey': 'ssh key public security access developer github server login rsa ed25519',
-            'docker': 'docker container image devops kubernetes virtualization hub containerization',
-            'serverinfo': 'server ip port ssh login credentials host remote machine',
             'totp': 'totp 2fa authenticator security two factor auth code google authy',
             'app': 'app bundle link generic application mobile store install download',
-            'as': 'app store ios apple search find application iphone ipad mac',
-            'ps': 'play store android google search find application mobile samsung',
             'yt': 'youtube video app deep link google watch content channel playlist',
-            'im': 'imdb movie app link film database actor title cinema show',
             'sp': 'spotify music track uri streaming audio playlist artist album song',
             'maps': 'maps smart search generic location navigation direction driving find',
-            'yl': 'yelp app business query restaurant review local food services',
-            'fq': 'foursquare venue uri location check in local swarm',
-            'uber': 'uber ride request target transportation taxi drive travel trip',
-            'lyft': 'lyft ride request target transportation taxi drive travel trip',
-            'event': 'event calendar file appointment meeting schedule date time booking',
-            'book': 'book isbn search library reading literature author title volume',
-            'secret': 'secret note hidden text private message encrypted lock vault'
+            'event': 'event calendar file appointment meeting schedule date time booking'
         };
+
 
         this.currentCategory = 'all';
         this.currentSearchTerm = '';
@@ -551,6 +574,13 @@ class QRGeneratorPro {
     selectType(type) {
         this.selectedType = type;
 
+        // Clear serial number when switching types
+        this.customization.serialNumber = null;
+        const serialInput = document.getElementById('serial-number-input');
+        const clearSerialBtn = document.getElementById('clear-serial-btn');
+        if (serialInput) serialInput.value = '';
+        if (clearSerialBtn) clearSerialBtn.style.display = 'none';
+
         // Update UI
         document.querySelectorAll('.type-card').forEach(card => {
             card.classList.toggle('selected', card.dataset.type === type);
@@ -635,6 +665,8 @@ class QRGeneratorPro {
     }
 
     goToPage(pageNumber) {
+        if (pageNumber > 2) return; // Only 2 pages exist in the new unified editor
+
         // Hide current page
         document.querySelectorAll('.page').forEach(page => {
             page.classList.remove('active');
@@ -653,6 +685,7 @@ class QRGeneratorPro {
             this.loadHistoryDisplay();
         } else if (pageNumber === 2) {
             this.setupInputPage();
+            setTimeout(() => this.generateLiveQR(), 100);
         }
 
         // Re-add ripple effects to new buttons
@@ -779,9 +812,16 @@ class QRGeneratorPro {
                     <div class="form-group">
                         <label for="wifi-security">Security Type</label>
                         <select id="wifi-security" class="form-input">
-                            <option value="WPA">WPA/WPA2</option>
+                            <option value="WPA">WPA/WPA2/WPA3</option>
                             <option value="WEP">WEP</option>
                             <option value="nopass">Open (No Password)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="wifi-hidden">Hidden Network?</label>
+                        <select id="wifi-hidden" class="form-input">
+                            <option value="false">No</option>
+                            <option value="true">Yes</option>
                         </select>
                     </div>
                 `;
@@ -898,14 +938,21 @@ class QRGeneratorPro {
                         <label for="event-location">Location</label>
                         <input type="text" id="event-location" class="form-input" placeholder="Conference Room A">
                     </div>
+                    <div class="form-group">
+                        <label for="event-allday">All Day Event?</label>
+                        <select id="event-allday" class="form-input">
+                            <option value="false">No, specific times</option>
+                            <option value="true">Yes, all day</option>
+                        </select>
+                    </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="event-start-date">Start Date *</label>
                             <input type="date" id="event-start-date" class="form-input" required>
                         </div>
                         <div class="form-group">
-                            <label for="event-start-time">Start Time *</label>
-                            <input type="time" id="event-start-time" class="form-input" required>
+                            <label for="event-start-time">Start Time</label>
+                            <input type="time" id="event-start-time" class="form-input">
                         </div>
                     </div>
                     <div class="form-row">
@@ -914,23 +961,20 @@ class QRGeneratorPro {
                             <input type="date" id="event-end-date" class="form-input" required>
                         </div>
                         <div class="form-group">
-                            <label for="event-end-time">End Time *</label>
-                            <input type="time" id="event-end-time" class="form-input" required>
+                            <label for="event-end-time">End Time</label>
+                            <input type="time" id="event-end-time" class="form-input">
                         </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="event-timezone">Timezone</label>
+                        <select id="event-timezone" class="form-input">
+                            <option value="Z">UTC (GMT)</option>
+                            <option value="local">Local Time</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="event-description">Description</label>
                         <textarea id="event-description" class="form-input" rows="3" placeholder="Event details..." maxlength="200"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="event-reminder">Reminder</label>
-                        <select id="event-reminder" class="form-input">
-                            <option value="0">No reminder</option>
-                            <option value="15">15 minutes before</option>
-                            <option value="30">30 minutes before</option>
-                            <option value="60">1 hour before</option>
-                            <option value="1440">1 day before</option>
-                        </select>
                     </div>
                 `;
                 break;
@@ -982,22 +1026,6 @@ class QRGeneratorPro {
                         <select id="barcode-format" class="form-input">
                             <option value="CODE128">Code 128 (General)</option>
                             <option value="EAN13">EAN-13 (Products)</option>
-                            <option value="EAN8">EAN-8 (Small Products)</option>
-                            <option value="UPC">UPC-A (US Products)</option>
-                            <option value="CODE39">Code 39 (Alphanumeric)</option>
-                            <option value="ITF14">ITF-14 (Shipping)</option>
-                            <option value="MSI">MSI (Inventory)</option>
-                            <option value="pharmacode">Pharmacode (Pharma)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="barcode-data">Barcode Data *</label>
-                        <input type="text" id="barcode-data" class="form-input" placeholder="123456789012" required>
-                    </div>
-                    <div class="barcode-help" id="barcode-help">
-                        <i class="fas fa-info-circle"></i>
-                        <span>Code 128: Any alphanumeric text</span>
-                    </div>
                     <div class="form-group">
                         <label for="barcode-text">Display Text (Optional)</label>
                         <input type="text" id="barcode-text" class="form-input" placeholder="Custom text below barcode">
@@ -1010,27 +1038,6 @@ class QRGeneratorPro {
                 `;
                 break;
 
-            case 'developer':
-                title.textContent = 'Developer Repos';
-                subtitle.textContent = 'GitHub or GitLab Project';
-                html = `
-                    <div class="form-group">
-                        <label for="dev-platform">Platform *</label>
-                        <select id="dev-platform" class="form-input">
-                            <option value="github">GitHub</option>
-                            <option value="gitlab">GitLab</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="dev-user">Username / Org *</label>
-                        <input type="text" id="dev-user" class="form-input" placeholder="google" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="dev-repo">Repository Name *</label>
-                        <input type="text" id="dev-repo" class="form-input" placeholder="material-design" required>
-                    </div>
-                `;
-                break;
 
             case 'maps':
                 title.textContent = 'Smart Navigation';
@@ -1111,12 +1118,354 @@ class QRGeneratorPro {
                         <input type="text" id="medical-name" class="form-input" placeholder="John Doe" required>
                     </div>
                     <div class="form-group">
-                        <label for="medical-blood">Blood Type</label>
-                        <input type="text" id="medical-blood" class="form-input" placeholder="O+">
+                        <label for="medical-blood">Blood Group</label>
+                        <select id="medical-blood" class="form-input">
+                            <option value="">Unknown / Skip</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label for="medical-conditions">Conditions / Allergies</label>
-                        <textarea id="medical-conditions" class="form-input" rows="3" placeholder="Diabetes, Penicillin allergy..."></textarea>
+                        <label for="medical-donor">Organ Donor</label>
+                        <select id="medical-donor" class="form-input">
+                            <option value="">Unspecified</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="medical-contact-name">Emergency Contact Name</label>
+                        <input type="text" id="medical-contact-name" class="form-input" placeholder="Jane Doe">
+                    </div>
+                    <div class="form-group">
+                        <label for="medical-contact-phone">Emergency Contact Phone</label>
+                        <input type="tel" id="medical-contact-phone" class="form-input" placeholder="+1 234 567 8900">
+                    </div>
+                    <div class="form-group">
+                        <label for="medical-allergies">Known Allergies</label>
+                        <textarea id="medical-allergies" class="form-input" rows="2" placeholder="Penicillin, Peanuts..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="medical-meds">Current Medications</label>
+                        <textarea id="medical-meds" class="form-input" rows="2" placeholder="Insulin, Inhaler..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="medical-conditions">Other Conditions</label>
+                        <textarea id="medical-conditions" class="form-input" rows="2" placeholder="Diabetes, Asthma..."></textarea>
+                    </div>
+                `;
+                break;
+
+            case 'health_insurance':
+                title.textContent = 'Health Insurance';
+                subtitle.textContent = 'Insurance Provider Details';
+                html = `
+                    <div class="form-group">
+                        <label for="hi-provider">Provider Name *</label>
+                        <input type="text" id="hi-provider" class="form-input" placeholder="e.g. Blue Cross" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="hi-member">Member ID *</label>
+                        <input type="text" id="hi-member" class="form-input" placeholder="e.g. 123456789" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="hi-group">Group Number</label>
+                        <input type="text" id="hi-group" class="form-input" placeholder="e.g. 98765">
+                    </div>
+                    <div class="form-group">
+                        <label for="hi-plan">Plan Type</label>
+                        <input type="text" id="hi-plan" class="form-input" placeholder="e.g. HMO / PPO">
+                    </div>
+                    <div class="form-group">
+                        <label for="hi-phone">Provider Phone</label>
+                        <input type="tel" id="hi-phone" class="form-input" placeholder="e.g. 1-800-123-4567">
+                    </div>
+                `;
+                break;
+
+            case 'vaccine':
+                title.textContent = 'Vaccination Record';
+                subtitle.textContent = 'Immunization History';
+                html = `
+                    <div class="form-group">
+                        <label for="vac-name">Vaccine Name *</label>
+                        <input type="text" id="vac-name" class="form-input" placeholder="e.g. COVID-19 / Flu" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="vac-date">Date Administered *</label>
+                        <input type="date" id="vac-date" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="vac-clinic">Clinic / Doctor</label>
+                        <input type="text" id="vac-clinic" class="form-input" placeholder="e.g. City Hospital">
+                    </div>
+                    <div class="form-group">
+                        <label for="vac-batch">Batch Number</label>
+                        <input type="text" id="vac-batch" class="form-input" placeholder="e.g. AB1234">
+                    </div>
+                `;
+                break;
+
+            case 'allergy_alert':
+                title.textContent = 'Allergy Alert';
+                subtitle.textContent = 'Severe Allergies & Care';
+                html = `
+                    <div class="form-group">
+                        <label for="allergy-name">Full Name *</label>
+                        <input type="text" id="allergy-name" class="form-input" placeholder="e.g. Jane Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="allergy-list">Severe Allergies *</label>
+                        <textarea id="allergy-list" class="form-input" rows="2" placeholder="e.g. Penicillin, Peanuts, Bee stings" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="allergy-symptoms">Reaction Symptoms</label>
+                        <input type="text" id="allergy-symptoms" class="form-input" placeholder="e.g. Anaphylaxis, swelling, rash">
+                    </div>
+                    <div class="form-group">
+                        <label for="allergy-action">Emergency Action / Treatment</label>
+                        <input type="text" id="allergy-action" class="form-input" placeholder="e.g. Administer EpiPen, call 911 immediately">
+                    </div>
+                    <div class="form-group">
+                        <label for="allergy-epipen">Carries EpiPen?</label>
+                        <select id="allergy-epipen" class="form-input">
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                            <option value="N/A" selected>N/A</option>
+                        </select>
+                    </div>
+                `;
+                break;
+
+            case 'medication_tracker':
+                title.textContent = 'Medication Schedule';
+                subtitle.textContent = 'Daily Medications & Dosage';
+                html = `
+                    <div class="form-group">
+                        <label for="med-patient">Patient Name *</label>
+                        <input type="text" id="med-patient" class="form-input" placeholder="e.g. John Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="med-name-1">Medication 1 Name *</label>
+                        <input type="text" id="med-name-1" class="form-input" placeholder="e.g. Metformin" required>
+                    </div>
+                    <div class="form-group-row" style="display: flex; gap: 10px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="med-dosage-1">Dosage 1 *</label>
+                            <input type="text" id="med-dosage-1" class="form-input" placeholder="e.g. 500mg" required>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="med-freq-1">Frequency 1 *</label>
+                            <input type="text" id="med-freq-1" class="form-input" placeholder="e.g. Twice daily" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="med-name-2">Medication 2 Name</label>
+                        <input type="text" id="med-name-2" class="form-input" placeholder="e.g. Lisinopril">
+                    </div>
+                    <div class="form-group-row" style="display: flex; gap: 10px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="med-dosage-2">Dosage 2</label>
+                            <input type="text" id="med-dosage-2" class="form-input" placeholder="e.g. 10mg">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="med-freq-2">Frequency 2</label>
+                            <input type="text" id="med-freq-2" class="form-input" placeholder="e.g. Every morning">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="med-instructions">Special Instructions</label>
+                        <textarea id="med-instructions" class="form-input" rows="2" placeholder="Take with food, avoid grapefruit, etc."></textarea>
+                    </div>
+                `;
+                break;
+
+            case 'ice_contacts':
+                title.textContent = 'Emergency Contacts';
+                subtitle.textContent = 'In Case of Emergency (ICE)';
+                html = `
+                    <div class="form-group">
+                        <label for="ice-name-1">Primary Contact Name *</label>
+                        <input type="text" id="ice-name-1" class="form-input" placeholder="e.g. Sarah Smith" required>
+                    </div>
+                    <div class="form-group-row" style="display: flex; gap: 10px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="ice-rel-1">Relationship *</label>
+                            <input type="text" id="ice-rel-1" class="form-input" placeholder="e.g. Spouse" required>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="ice-phone-1">Primary Phone *</label>
+                            <input type="tel" id="ice-phone-1" class="form-input" placeholder="e.g. 555-0199" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="ice-name-2">Secondary Contact Name</label>
+                        <input type="text" id="ice-name-2" class="form-input" placeholder="e.g. Robert Smith">
+                    </div>
+                    <div class="form-group-row" style="display: flex; gap: 10px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="ice-rel-2">Relationship</label>
+                            <input type="text" id="ice-rel-2" class="form-input" placeholder="e.g. Father">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="ice-phone-2">Secondary Phone</label>
+                            <input type="tel" id="ice-phone-2" class="form-input" placeholder="e.g. 555-0188">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="ice-hospital">Preferred Hospital</label>
+                        <input type="text" id="ice-hospital" class="form-input" placeholder="e.g. Memorial Hospital">
+                    </div>
+                `;
+                break;
+
+            case 'blood_donor':
+                title.textContent = 'Blood Donor Profile';
+                subtitle.textContent = 'Donor Card Details';
+                html = `
+                    <div class="form-group">
+                        <label for="donor-name">Donor Name *</label>
+                        <input type="text" id="donor-name" class="form-input" placeholder="e.g. David Jones" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="donor-blood">Blood Type *</label>
+                        <select id="donor-blood" class="form-input" required>
+                            <option value="" disabled selected>Select Blood Group</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                            <option value="Unknown">Unknown</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="donor-id">Donor ID / Reg Number</label>
+                        <input type="text" id="donor-id" class="form-input" placeholder="e.g. BLD-98765">
+                    </div>
+                    <div class="form-group">
+                        <label for="donor-last-date">Last Donation Date</label>
+                        <input type="date" id="donor-last-date" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="donor-center">Preferred Donor Center</label>
+                        <input type="text" id="donor-center" class="form-input" placeholder="e.g. Red Cross Center City">
+                    </div>
+                `;
+                break;
+
+            case 'vision_rx':
+                title.textContent = 'Vision Prescription';
+                subtitle.textContent = 'Eyewear Prescription Details';
+                html = `
+                    <div class="form-group">
+                        <label for="vision-name">Patient Name *</label>
+                        <input type="text" id="vision-name" class="form-input" placeholder="e.g. Alice Cooper" required>
+                    </div>
+                    <div style="margin-bottom: 12px; font-weight: 600; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; color: var(--text-color);">Right Eye (OD)</div>
+                    <div class="form-group-row" style="display: flex; gap: 8px; margin-bottom: 10px;">
+                        <div style="flex: 1;">
+                            <label for="vision-od-sph" style="font-size: 12px;">Sphere (SPH)</label>
+                            <input type="text" id="vision-od-sph" class="form-input" placeholder="-2.50">
+                        </div>
+                        <div style="flex: 1;">
+                            <label for="vision-od-cyl" style="font-size: 12px;">Cylinder (CYL)</label>
+                            <input type="text" id="vision-od-cyl" class="form-input" placeholder="-0.75">
+                        </div>
+                        <div style="flex: 1;">
+                            <label for="vision-od-axis" style="font-size: 12px;">Axis</label>
+                            <input type="number" id="vision-od-axis" class="form-input" placeholder="180">
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 12px; font-weight: 600; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; color: var(--text-color);">Left Eye (OS)</div>
+                    <div class="form-group-row" style="display: flex; gap: 8px; margin-bottom: 10px;">
+                        <div style="flex: 1;">
+                            <label for="vision-os-sph" style="font-size: 12px;">Sphere (SPH)</label>
+                            <input type="text" id="vision-os-sph" class="form-input" placeholder="-2.25">
+                        </div>
+                        <div style="flex: 1;">
+                            <label for="vision-os-cyl" style="font-size: 12px;">Cylinder (CYL)</label>
+                            <input type="text" id="vision-os-cyl" class="form-input" placeholder="-0.50">
+                        </div>
+                        <div style="flex: 1;">
+                            <label for="vision-os-axis" style="font-size: 12px;">Axis</label>
+                            <input type="number" id="vision-os-axis" class="form-input" placeholder="175">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="vision-pd">Pupillary Distance (PD)</label>
+                        <input type="text" id="vision-pd" class="form-input" placeholder="e.g. 63 mm">
+                    </div>
+                `;
+                break;
+
+            case 'pet_medical':
+                title.textContent = 'Pet Health Card';
+                subtitle.textContent = 'Pet Emergency & Vet Record';
+                html = `
+                    <div class="form-group-row" style="display: flex; gap: 10px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="pet-name">Pet Name *</label>
+                            <input type="text" id="pet-name" class="form-input" placeholder="e.g. Max" required>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="pet-breed">Species & Breed *</label>
+                            <input type="text" id="pet-breed" class="form-input" placeholder="e.g. Dog - Retriever" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="pet-microchip">Microchip Number</label>
+                        <input type="text" id="pet-microchip" class="form-input" placeholder="e.g. 985112000123456">
+                    </div>
+                    <div class="form-group">
+                        <label for="pet-conditions">Conditions & Allergies</label>
+                        <textarea id="pet-conditions" class="form-input" rows="2" placeholder="e.g. Epilepsy, allergic to penicillin, needs daily meds"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="pet-vet">Vet Name & Phone</label>
+                        <input type="text" id="pet-vet" class="form-input" placeholder="e.g. Dr. Brown, VetClinic (555-0155)">
+                    </div>
+                `;
+                break;
+
+            case 'advance_directive':
+                title.textContent = 'Living Will / DNR';
+                subtitle.textContent = 'Advance Healthcare Directives';
+                html = `
+                    <div class="form-group">
+                        <label for="ad-name">Patient Name *</label>
+                        <input type="text" id="ad-name" class="form-input" placeholder="e.g. Robert Miller" required>
+                    </div>
+                    <div class="form-group-row" style="display: flex; gap: 10px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="ad-proxy-name">Healthcare Proxy *</label>
+                            <input type="text" id="ad-proxy-name" class="form-input" placeholder="e.g. Sarah Miller" required>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="ad-proxy-phone">Proxy Phone *</label>
+                            <input type="tel" id="ad-proxy-phone" class="form-input" placeholder="e.g. 555-0144" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="ad-dnr">DNR (Do Not Resuscitate) *</label>
+                        <select id="ad-dnr" class="form-input" required>
+                            <option value="DNR (Do Not Resuscitate) - Active" selected>Yes, Do Not Resuscitate (DNR)</option>
+                            <option value="Full Code (Resuscitate)">No, Full Code (Attempt Resuscitation)</option>
+                            <option value="Unspecified">Unspecified / Refer to Proxy</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="ad-doc-location">Directive Document Location</label>
+                        <input type="text" id="ad-doc-location" class="form-input" placeholder="e.g. In safe box at home / Dr. Green's office">
                     </div>
                 `;
                 break;
@@ -1140,53 +1489,6 @@ class QRGeneratorPro {
                 `;
                 break;
 
-            case 'discord':
-                title.textContent = 'Discord';
-                subtitle.textContent = 'Server or Profile';
-                html = `
-                    <div class="form-group">
-                        <label for="discord-id">Invite Link / Username *</label>
-                        <input type="text" id="discord-id" class="form-input" placeholder="discord.gg/invitelink" required>
-                    </div>
-                `;
-                break;
-
-            case 'book':
-                title.textContent = 'Book Search';
-                subtitle.textContent = 'Search by ISBN or Title';
-                html = `
-                    <div class="form-group">
-                        <label for="book-query">ISBN or Title *</label>
-                        <input type="text" id="book-query" class="form-input" placeholder="978-0123..." required>
-                    </div>
-                `;
-                break;
-
-            case 'coupon':
-                title.textContent = 'Coupon Card';
-                subtitle.textContent = 'Deals & Expiry info';
-                html = `
-                    <div class="form-group">
-                        <label for="coupon-code">Promo Code *</label>
-                        <input type="text" id="coupon-code" class="form-input" placeholder="SAVE50" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="coupon-desc">Deal Description</label>
-                        <input type="text" id="coupon-desc" class="form-input" placeholder="50% off select items">
-                    </div>
-                `;
-                break;
-
-            case 'secret':
-                title.textContent = 'Secret Note';
-                subtitle.textContent = 'Hidden secure message';
-                html = `
-                    <div class="form-group">
-                        <label for="secret-msg">Your Message *</label>
-                        <textarea id="secret-msg" class="form-input" rows="4" placeholder="Enter private note..." required></textarea>
-                    </div>
-                `;
-                break;
 
             case 'sp':
                 title.textContent = 'Spotify Smart Link';
@@ -1229,27 +1531,9 @@ class QRGeneratorPro {
                     </div>`;
                 break;
 
-            case 'im':
-                title.textContent = 'IMDb Encyclopedia';
-                subtitle.textContent = 'Bio, Movies, or TV Shows';
-                html = `
-                    <div class="form-group">
-                        <label for="im-type">Link Type</label>
-                        <select id="im-type" class="form-input">
-                            <option value="title">Movie / TV Title (tt...)</option>
-                            <option value="name">Name / Actor / Crew (nm...)</option>
-                            <option value="company">Production Company (co...)</option>
-                            <option value="search">Search Query</option>
-                            <option value="custom">Direct IMDb URL</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="im-id">ID / Query / URL *</label>
-                        <input type="text" id="im-id" class="form-input" placeholder="e.g. tt1234567" required>
-                    </div>`;
-                break;
 
-            case 'wa': case 'tg': case 'vb': case 'sk': case 'ft': case 'fta': case 'zm': case 'wx': case 'yl': case 'fq': case 'as': case 'ps':
+
+            case 'wa': case 'tg': case 'vb': case 'sk': case 'ft': case 'fta': case 'zm': case 'wx': case 'yl': case 'fq':
                 const deepMap = {
                     wa: { t: 'WhatsApp Deep Link', s: 'Phone Number', ph: '1234567890' },
                     tg: { t: 'Telegram Message', s: 'Username', ph: 'username' },
@@ -1260,9 +1544,7 @@ class QRGeneratorPro {
                     zm: { t: 'Zoom Deep Link', s: 'Meeting ID', ph: '123456789' },
                     wx: { t: 'Webex Deep Link', s: 'Meeting ID', ph: '123456789' },
                     yl: { t: 'Yelp Place Link', s: 'Business ID', ph: 'biz-id' },
-                    fq: { t: 'Foursquare Link', s: 'Venue ID', ph: 'venue-id' },
-                    as: { t: 'App Store Search', s: 'Search Query', ph: 'Game name' },
-                    ps: { t: 'Play Store Search', s: 'Search Query', ph: 'Game name' }
+                    fq: { t: 'Foursquare Link', s: 'Venue ID', ph: 'venue-id' }
                 };
                 const info = deepMap[this.selectedType];
                 title.textContent = info.t;
@@ -1276,8 +1558,6 @@ class QRGeneratorPro {
                         <label for="${this.selectedType}-custom">Or Custom URI (Optional)</label>
                         <input type="text" id="${this.selectedType}-custom" class="form-input" placeholder="protocol://full/path">
                     </div>`;
-                break;
-
                 break;
 
             case 'prompt':
@@ -1376,47 +1656,391 @@ class QRGeneratorPro {
                         <input type="text" id="id-issued" class="form-input" placeholder="Organization / Board">
                     </div>`;
                 break;
-            case 'sshkey':
-                title.textContent = 'SSH Public Key';
-                subtitle.textContent = 'Encode your public key for sharing';
+            case 'home_inventory':
+                title.textContent = 'Home Inventory';
+                subtitle.textContent = 'Track household items';
                 html = `
                     <div class="form-group">
-                        <label for="ssh-key">Public Key Data *</label>
-                        <textarea id="ssh-key" class="form-input" rows="4" placeholder="ssh-rsa AAAAB3N..." required></textarea>
-                    </div>`;
-                break;
-            case 'docker':
-                title.textContent = 'Docker Hub';
-                subtitle.textContent = 'Direct image link';
-                html = `
-                    <div class="form-group">
-                        <label for="docker-image">Image Name / Path *</label>
-                        <input type="text" id="docker-image" class="form-input" placeholder="nginx:latest or user/repo:v1" required>
-                    </div>`;
-                break;
-            case 'serverinfo':
-                title.textContent = 'Server Details';
-                subtitle.textContent = 'IP, Port and Protocol info';
-                html = `
-                    <div class="form-group">
-                        <label for="srv-ip">Server Address (IP/Domain) *</label>
-                        <input type="text" id="srv-ip" class="form-input" placeholder="192.168.1.10" required>
+                        <label for="hi-name">Item Name *</label>
+                        <input type="text" id="hi-name" class="form-input" placeholder="MacBook Pro" required>
                     </div>
                     <div class="form-group">
-                        <label for="srv-port">Port Number</label>
-                        <input type="number" id="srv-port" class="form-input" placeholder="22">
+                        <label for="hi-serial">Serial Number</label>
+                        <input type="text" id="hi-serial" class="form-input" placeholder="C02XX0XXXXXX">
                     </div>
                     <div class="form-group">
-                        <label for="srv-protocol">Protocol</label>
-                        <select id="srv-protocol" class="form-input">
-                            <option value="ssh">SSH</option>
-                            <option value="ftp">FTP</option>
-                            <option value="http">HTTP</option>
-                            <option value="https">HTTPS</option>
-                            <option value="custom">Custom</option>
-                        </select>
+                        <label for="hi-value">Value / Purchase Price</label>
+                        <input type="text" id="hi-value" class="form-input" placeholder="$2,000">
+                    </div>
+                    <div class="form-group">
+                        <label for="hi-loc">Location</label>
+                        <input type="text" id="hi-loc" class="form-input" placeholder="Home Office">
                     </div>`;
                 break;
+            case 'pantry_tracker':
+                title.textContent = 'Pantry Tracker';
+                subtitle.textContent = 'Track food expiration';
+                html = `
+                    <div class="form-group">
+                        <label for="pt-item">Item Name *</label>
+                        <input type="text" id="pt-item" class="form-input" placeholder="Oat Milk" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="pt-qty">Quantity</label>
+                        <input type="text" id="pt-qty" class="form-input" placeholder="2 Cartons">
+                    </div>
+                    <div class="form-group">
+                        <label for="pt-exp">Expiration Date</label>
+                        <input type="date" id="pt-exp" class="form-input">
+                    </div>`;
+                break;
+            case 'spare_key':
+                title.textContent = 'Spare Key Location';
+                subtitle.textContent = 'Instructions for key access';
+                html = `
+                    <div class="form-group">
+                        <label for="sk-for">For Who *</label>
+                        <input type="text" id="sk-for" class="form-input" placeholder="Dog Sitter" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sk-loc">Location/Lockbox</label>
+                        <input type="text" id="sk-loc" class="form-input" placeholder="Back Porch">
+                    </div>
+                    <div class="form-group">
+                        <label for="sk-code">Code/Instructions</label>
+                        <textarea id="sk-code" class="form-textarea" placeholder="Code is 1234"></textarea>
+                    </div>`;
+                break;
+            case 'recipe_card':
+                title.textContent = 'Recipe Card';
+                subtitle.textContent = 'Quick recipe reference';
+                html = `
+                    <div class="form-group">
+                        <label for="rc-name">Recipe Name *</label>
+                        <input type="text" id="rc-name" class="form-input" placeholder="Grandma's Cookies" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="rc-time">Prep/Cook Time</label>
+                        <input type="text" id="rc-time" class="form-input" placeholder="30 mins">
+                    </div>
+                    <div class="form-group">
+                        <label for="rc-ing">Ingredients</label>
+                        <textarea id="rc-ing" class="form-textarea" placeholder="Flour, Sugar, Eggs..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="rc-steps">Steps</label>
+                        <textarea id="rc-steps" class="form-textarea" placeholder="Mix and bake..."></textarea>
+                    </div>`;
+                break;
+            case 'meal_planner':
+                title.textContent = 'Meal Planner';
+                subtitle.textContent = 'Weekly meal schedule';
+                html = `
+                    <div class="form-group">
+                        <label for="mp-mon">Monday *</label>
+                        <input type="text" id="mp-mon" class="form-input" placeholder="Pasta" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mp-tue">Tuesday</label>
+                        <input type="text" id="mp-tue" class="form-input" placeholder="Tacos">
+                    </div>
+                    <div class="form-group">
+                        <label for="mp-wed">Wednesday</label>
+                        <input type="text" id="mp-wed" class="form-input" placeholder="Salad">
+                    </div>
+                    <div class="form-group">
+                        <label for="mp-thu">Thursday</label>
+                        <input type="text" id="mp-thu" class="form-input" placeholder="Chicken">
+                    </div>
+                    <div class="form-group">
+                        <label for="mp-fri">Friday</label>
+                        <input type="text" id="mp-fri" class="form-input" placeholder="Pizza">
+                    </div>`;
+                break;
+            case 'wardrobe_storage':
+                title.textContent = 'Wardrobe Storage';
+                subtitle.textContent = 'Log seasonal clothing';
+                html = `
+                    <div class="form-group">
+                        <label for="ws-box">Box/Bin Name *</label>
+                        <input type="text" id="ws-box" class="form-input" placeholder="Box A" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ws-season">Season</label>
+                        <input type="text" id="ws-season" class="form-input" placeholder="Winter">
+                    </div>
+                    <div class="form-group">
+                        <label for="ws-items">Contents</label>
+                        <textarea id="ws-items" class="form-textarea" placeholder="Sweaters, Coats..."></textarea>
+                    </div>`;
+                break;
+            case 'plant_care':
+                title.textContent = 'Plant Care';
+                subtitle.textContent = 'Care instructions';
+                html = `
+                    <div class="form-group">
+                        <label for="pc-name">Plant Name *</label>
+                        <input type="text" id="pc-name" class="form-input" placeholder="Monstera" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="pc-sun">Sunlight Needs</label>
+                        <input type="text" id="pc-sun" class="form-input" placeholder="Indirect light">
+                    </div>
+                    <div class="form-group">
+                        <label for="pc-water">Watering Schedule</label>
+                        <input type="text" id="pc-water" class="form-input" placeholder="Once a week">
+                    </div>`;
+                break;
+            case 'bike_maintenance':
+                title.textContent = 'Bike Maintenance';
+                subtitle.textContent = 'Log bike service';
+                html = `
+                    <div class="form-group">
+                        <label for="bm-model">Bike Model *</label>
+                        <input type="text" id="bm-model" class="form-input" placeholder="Trek FX" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bm-last">Last Serviced</label>
+                        <input type="date" id="bm-last" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="bm-tire">Tire Pressure (PSI)</label>
+                        <input type="text" id="bm-tire" class="form-input" placeholder="60 PSI">
+                    </div>`;
+                break;
+            case 'car_maintenance':
+                title.textContent = 'Car Maintenance';
+                subtitle.textContent = 'Auto service specs';
+                html = `
+                    <div class="form-group">
+                        <label for="cm-model">Vehicle Model *</label>
+                        <input type="text" id="cm-model" class="form-input" placeholder="Honda Civic" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cm-vin">VIN Number</label>
+                        <input type="text" id="cm-vin" class="form-input" placeholder="1HG...">
+                    </div>
+                    <div class="form-group">
+                        <label for="cm-oil">Oil Type</label>
+                        <input type="text" id="cm-oil" class="form-input" placeholder="0W-20">
+                    </div>
+                    <div class="form-group">
+                        <label for="cm-tire">Tire Size / PSI</label>
+                        <input type="text" id="cm-tire" class="form-input" placeholder="215/55R16 32 PSI">
+                    </div>`;
+                break;
+            case 'wifi_extender':
+                title.textContent = 'Wi-Fi Extender';
+                subtitle.textContent = 'Extender setup details';
+                html = `
+                    <div class="form-group">
+                        <label for="we-ssid">Extender SSID *</label>
+                        <input type="text" id="we-ssid" class="form-input" placeholder="HomeNet_EXT" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="we-ip">Admin IP</label>
+                        <input type="text" id="we-ip" class="form-input" placeholder="192.168.1.250">
+                    </div>
+                    <div class="form-group">
+                        <label for="we-pass">Admin Password</label>
+                        <input type="text" id="we-pass" class="form-input" placeholder="admin123">
+                    </div>`;
+                break;
+            case 'alarm_code':
+                title.textContent = 'Security Alarm';
+                subtitle.textContent = 'System codes';
+                html = `
+                    <div class="form-group">
+                        <label for="ac-name">System Name *</label>
+                        <input type="text" id="ac-name" class="form-input" placeholder="Home Alarm" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ac-arm">Arm Code</label>
+                        <input type="text" id="ac-arm" class="form-input" placeholder="1234">
+                    </div>
+                    <div class="form-group">
+                        <label for="ac-disarm">Disarm Code</label>
+                        <input type="text" id="ac-disarm" class="form-input" placeholder="1234">
+                    </div>
+                    <div class="form-group">
+                        <label for="ac-guest">Guest Password</label>
+                        <input type="text" id="ac-guest" class="form-input" placeholder="Word">
+                    </div>`;
+                break;
+            case 'gym_routine':
+                title.textContent = 'Gym Routine';
+                subtitle.textContent = 'Workout log';
+                html = `
+                    <div class="form-group">
+                        <label for="gr-name">Routine Name *</label>
+                        <input type="text" id="gr-name" class="form-input" placeholder="Push Day" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gr-target">Target Muscle Group</label>
+                        <input type="text" id="gr-target" class="form-input" placeholder="Chest, Triceps">
+                    </div>
+                    <div class="form-group">
+                        <label for="gr-ex">Exercises (Sets x Reps)</label>
+                        <textarea id="gr-ex" class="form-textarea" placeholder="Bench: 3x10\nFlyes: 3x12"></textarea>
+                    </div>`;
+                break;
+            case 'bp_log':
+                title.textContent = 'BP Log';
+                subtitle.textContent = 'Blood pressure tracker';
+                html = `
+                    <div class="form-group">
+                        <label for="bpl-date">Date/Time *</label>
+                        <input type="datetime-local" id="bpl-date" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bpl-sys">Systolic (Top)</label>
+                        <input type="number" id="bpl-sys" class="form-input" placeholder="120">
+                    </div>
+                    <div class="form-group">
+                        <label for="bpl-dia">Diastolic (Bottom)</label>
+                        <input type="number" id="bpl-dia" class="form-input" placeholder="80">
+                    </div>
+                    <div class="form-group">
+                        <label for="bpl-hr">Heart Rate</label>
+                        <input type="number" id="bpl-hr" class="form-input" placeholder="70">
+                    </div>`;
+                break;
+            case 'vitamin_schedule':
+                title.textContent = 'Vitamin Schedule';
+                subtitle.textContent = 'Supplement tracker';
+                html = `
+                    <div class="form-group">
+                        <label for="vs-name">Supplement Name *</label>
+                        <input type="text" id="vs-name" class="form-input" placeholder="Vitamin D3" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="vs-dose">Dosage</label>
+                        <input type="text" id="vs-dose" class="form-input" placeholder="1000 IU">
+                    </div>
+                    <div class="form-group">
+                        <label for="vs-time">Time of Day</label>
+                        <input type="text" id="vs-time" class="form-input" placeholder="Morning with food">
+                    </div>`;
+                break;
+            case 'bedtime_routine':
+                title.textContent = 'Bedtime Routine';
+                subtitle.textContent = 'Sleep hygiene';
+                html = `
+                    <div class="form-group">
+                        <label for="br-bed">Target Bedtime *</label>
+                        <input type="time" id="br-bed" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="br-wake">Target Wake Time</label>
+                        <input type="time" id="br-wake" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="br-steps">Wind-down Steps</label>
+                        <textarea id="br-steps" class="form-textarea" placeholder="Read 20m, No screens..."></textarea>
+                    </div>`;
+                break;
+            case 'habit_tracker':
+                title.textContent = 'Habit Tracker';
+                subtitle.textContent = 'Daily goal check';
+                html = `
+                    <div class="form-group">
+                        <label for="ht-1">Habit 1 *</label>
+                        <input type="text" id="ht-1" class="form-input" placeholder="Drink 2L Water" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ht-2">Habit 2</label>
+                        <input type="text" id="ht-2" class="form-input" placeholder="Read 10 Pages">
+                    </div>
+                    <div class="form-group">
+                        <label for="ht-3">Habit 3</label>
+                        <input type="text" id="ht-3" class="form-input" placeholder="Meditate">
+                    </div>
+                    <div class="form-group">
+                        <label for="ht-freq">Frequency</label>
+                        <input type="text" id="ht-freq" class="form-input" placeholder="Daily">
+                    </div>`;
+                break;
+            case 'budget_tracker':
+                title.textContent = 'Budget Tracker';
+                subtitle.textContent = 'Monthly spending';
+                html = `
+                    <div class="form-group">
+                        <label for="bt-month">Month *</label>
+                        <input type="month" id="bt-month" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bt-total">Total Budget</label>
+                        <input type="text" id="bt-total" class="form-input" placeholder="$3,000">
+                    </div>
+                    <div class="form-group">
+                        <label for="bt-house">Housing</label>
+                        <input type="text" id="bt-house" class="form-input" placeholder="$1,500">
+                    </div>
+                    <div class="form-group">
+                        <label for="bt-save">Savings Goal</label>
+                        <input type="text" id="bt-save" class="form-input" placeholder="$500">
+                    </div>`;
+                break;
+            case 'evac_route':
+                title.textContent = 'Evacuation Route';
+                subtitle.textContent = 'Emergency plan';
+                html = `
+                    <div class="form-group">
+                        <label for="er-meet">Meeting Point *</label>
+                        <input type="text" id="er-meet" class="form-input" placeholder="Mailbox across street" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="er-pri">Primary Exit</label>
+                        <input type="text" id="er-pri" class="form-input" placeholder="Front Door">
+                    </div>
+                    <div class="form-group">
+                        <label for="er-contact">Emergency Contact</label>
+                        <input type="text" id="er-contact" class="form-input" placeholder="Mom: 555-1234">
+                    </div>`;
+                break;
+            case 'office_visitor':
+                title.textContent = 'Office Visitor Info';
+                subtitle.textContent = 'Guest details';
+                html = `
+                    <div class="form-group">
+                        <label for="ov-comp">Company Name *</label>
+                        <input type="text" id="ov-comp" class="form-input" placeholder="Tech Corp" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ov-room">Floor / Room</label>
+                        <input type="text" id="ov-room" class="form-input" placeholder="Floor 3, Conf A">
+                    </div>
+                    <div class="form-group">
+                        <label for="ov-wifi">Guest Wi-Fi</label>
+                        <input type="text" id="ov-wifi" class="form-input" placeholder="GuestNet">
+                    </div>
+                    <div class="form-group">
+                        <label for="ov-pass">Wi-Fi Password</label>
+                        <input type="text" id="ov-pass" class="form-input" placeholder="Welcome123">
+                    </div>`;
+                break;
+            case 'project_board':
+                title.textContent = 'Project Status';
+                subtitle.textContent = 'Task milestone';
+                html = `
+                    <div class="form-group">
+                        <label for="pb-name">Project Name *</label>
+                        <input type="text" id="pb-name" class="form-input" placeholder="Q3 Launch" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="pb-phase">Current Phase</label>
+                        <input type="text" id="pb-phase" class="form-input" placeholder="Development">
+                    </div>
+                    <div class="form-group">
+                        <label for="pb-mile">Next Milestone</label>
+                        <input type="text" id="pb-mile" class="form-input" placeholder="Beta Release">
+                    </div>
+                    <div class="form-group">
+                        <label for="pb-due">Deadline</label>
+                        <input type="date" id="pb-due" class="form-input">
+                    </div>`;
+                break;
+
         }
         container.innerHTML = html;
 
@@ -1445,6 +2069,42 @@ class QRGeneratorPro {
                 }
             }, 100);
         }
+
+        setTimeout(() => this.setupLivePreviewListeners(), 100);
+    }
+
+    setupLivePreviewListeners() {
+        const triggerUpdate = () => {
+            if (this.livePreviewTimeout) clearTimeout(this.livePreviewTimeout);
+            this.livePreviewTimeout = setTimeout(() => {
+                this.generateLiveQR();
+            }, 300); // 300ms debounce
+        };
+
+        // All inputs in input-container
+        const inputs = document.querySelectorAll('#input-container input, #input-container select, #input-container textarea');
+        inputs.forEach(input => {
+            input.addEventListener('input', triggerUpdate);
+            input.addEventListener('change', triggerUpdate);
+        });
+
+        // Color and Slider inputs
+        const configInputs = ['fg-color', 'bg-color', 'size-slider'];
+        configInputs.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', () => {
+                    if (id === 'fg-color') this.customization.fgColor = el.value;
+                    if (id === 'bg-color') this.customization.bgColor = el.value;
+                    if (id === 'size-slider') {
+                        this.customization.size = parseInt(el.value);
+                        const valDisplay = document.getElementById('size-value');
+                        if (valDisplay) valDisplay.textContent = el.value + 'px';
+                    }
+                    triggerUpdate();
+                });
+            }
+        });
     }
 
     collectInputData() {
@@ -1495,13 +2155,6 @@ class QRGeneratorPro {
             case 'barcode':
                 return this.generateBarcode();
 
-            case 'developer':
-                const devPlat = document.getElementById('dev-platform').value;
-                const devUser = document.getElementById('dev-user').value.trim();
-                const devRepo = document.getElementById('dev-repo').value.trim();
-                if (devPlat === 'github') return `https://github.com/${devUser}/${devRepo}`;
-                if (devPlat === 'gitlab') return `https://gitlab.com/${devUser}/${devRepo}`;
-                return '';
 
             case 'maps':
                 const mapPlat = document.getElementById('map-platform').value;
@@ -1526,6 +2179,33 @@ class QRGeneratorPro {
             case 'medical':
                 return this.generateMedical();
 
+            case 'health_insurance':
+                return this.generateHealthInsurance();
+
+            case 'vaccine':
+                return this.generateVaccine();
+
+            case 'allergy_alert':
+                return this.generateAllergyAlert();
+
+            case 'medication_tracker':
+                return this.generateMedicationTracker();
+
+            case 'ice_contacts':
+                return this.generateIceContacts();
+
+            case 'blood_donor':
+                return this.generateBloodDonor();
+
+            case 'vision_rx':
+                return this.generateVisionRx();
+
+            case 'pet_medical':
+                return this.generatePetMedical();
+
+            case 'advance_directive':
+                return this.generateAdvanceDirective();
+
             case 'donate':
                 const donPlat = document.getElementById('donate-platform').value;
                 const donUser = document.getElementById('donate-user').value.trim();
@@ -1534,25 +2214,8 @@ class QRGeneratorPro {
                 if (donPlat === 'coffee') return `https://www.buymeacoffee.com/${donUser}`;
                 return donUser;
 
-            case 'discord':
-                const discId = document.getElementById('discord-id').value.trim();
-                return discId.startsWith('http') ? discId : `https://discord.gg/${discId}`;
 
-                break;
-
-            case 'book':
-                const bkQuery = document.getElementById('book-query').value.trim();
-                return `https://isbnsearch.org/search?s=${encodeURIComponent(bkQuery)}`;
-
-            case 'coupon':
-                const copCode = document.getElementById('coupon-code').value.trim();
-                const copDesc = document.getElementById('coupon-desc').value.trim();
-                return `COUPON CODE: ${copCode}\nDeal: ${copDesc}`;
-
-            case 'secret':
-                return document.getElementById('secret-msg').value.trim();
-
-            case 'wa': case 'tg': case 'vb': case 'sk': case 'ft': case 'fta': case 'zm': case 'wx': case 'yl': case 'fq': case 'as': case 'ps':
+            case 'wa': case 'tg': case 'vb': case 'sk': case 'ft': case 'fta': case 'zm': case 'wx':
                 const customUri = document.getElementById(this.selectedType + '-custom').value;
                 if (customUri) return customUri;
 
@@ -1566,10 +2229,6 @@ class QRGeneratorPro {
                     case 'fta': return 'facetime-audio:' + idInput;
                     case 'zm': return 'zoommtg://zoom.us/join?confno=' + idInput;
                     case 'wx': return 'wbx://meet/' + idInput;
-                    case 'yl': return 'yelp:///biz/' + idInput;
-                    case 'fq': return 'foursquare://venues/' + idInput;
-                    case 'as': return 'itms-apps://search.itunes.apple.com/WebObjects/MZSearch.woa/wa/search?term=' + encodeURIComponent(idInput);
-                    case 'ps': return 'market://search?q=' + encodeURIComponent(idInput);
                     default: return '';
                 }
 
@@ -1600,8 +2259,7 @@ class QRGeneratorPro {
                 return document.getElementById(this.selectedType + '-data').value;
             case 'totp':
                 return `otpauth://totp/${encodeURIComponent(document.getElementById('totp-issuer').value)}:${encodeURIComponent(document.getElementById('totp-account').value)}?secret=${document.getElementById('totp-secret').value}&issuer=${encodeURIComponent(document.getElementById('totp-issuer').value)}`;
-            case 'uber': return 'uber://?action=setPickup&dropoff[latitude]=' + document.getElementById('uber-lat').value + '&dropoff[longitude]=' + document.getElementById('uber-lng').value;
-            case 'lyft': return 'lyft://ridetype?id=lyft&destination[latitude]=' + document.getElementById('lyft-lat').value + '&destination[longitude]=' + document.getElementById('lyft-lng').value;
+
             case 'mecard':
                 return this.generateMeCard();
             case 'linkedin':
@@ -1618,16 +2276,48 @@ class QRGeneratorPro {
                 const idN = document.getElementById('id-number').value.trim();
                 const idI = document.getElementById('id-issued').value.trim();
                 return `ID Type: ${idT}\nID Number: ${idN}\nIssued By: ${idI}`;
-            case 'sshkey':
-                return document.getElementById('ssh-key').value.trim();
-            case 'docker':
-                const img = document.getElementById('docker-image').value.trim();
-                return img.startsWith('http') ? img : `https://hub.docker.com/r/${img.includes('/') ? img : '_/' + img}`;
-            case 'serverinfo':
-                const sip = document.getElementById('srv-ip').value.trim();
-                const spr = document.getElementById('srv-port').value.trim();
-                const spro = document.getElementById('srv-protocol').value;
-                return `${spro}://${sip}${spr ? ':' + spr : ''}`;
+
+            case 'home_inventory':
+                return `HOME INVENTORY\nItem: ${document.getElementById('hi-name').value.trim()}\nSerial: ${document.getElementById('hi-serial').value.trim()}\nValue: ${document.getElementById('hi-value').value.trim()}\nLocation: ${document.getElementById('hi-loc').value.trim()}`;
+            case 'pantry_tracker':
+                return `PANTRY ITEM\nItem: ${document.getElementById('pt-item').value.trim()}\nQty: ${document.getElementById('pt-qty').value.trim()}\nExpires: ${document.getElementById('pt-exp').value.trim()}`;
+            case 'spare_key':
+                return `SPARE KEY\nFor: ${document.getElementById('sk-for').value.trim()}\nLocation: ${document.getElementById('sk-loc').value.trim()}\nCode/Inst: ${document.getElementById('sk-code').value.trim()}`;
+            case 'recipe_card':
+                return `RECIPE: ${document.getElementById('rc-name').value.trim()}\nTime: ${document.getElementById('rc-time').value.trim()}\n\nIngredients:\n${document.getElementById('rc-ing').value.trim()}\n\nSteps:\n${document.getElementById('rc-steps').value.trim()}`;
+            case 'meal_planner':
+                return `MEAL PLANNER\nMon: ${document.getElementById('mp-mon').value.trim()}\nTue: ${document.getElementById('mp-tue').value.trim()}\nWed: ${document.getElementById('mp-wed').value.trim()}\nThu: ${document.getElementById('mp-thu').value.trim()}\nFri: ${document.getElementById('mp-fri').value.trim()}`;
+            case 'wardrobe_storage':
+                return `WARDROBE STORAGE\nBox: ${document.getElementById('ws-box').value.trim()}\nSeason: ${document.getElementById('ws-season').value.trim()}\nContents:\n${document.getElementById('ws-items').value.trim()}`;
+            case 'plant_care':
+                return `PLANT CARE: ${document.getElementById('pc-name').value.trim()}\nSunlight: ${document.getElementById('pc-sun').value.trim()}\nWatering: ${document.getElementById('pc-water').value.trim()}`;
+            case 'bike_maintenance':
+                return `BIKE MAINTENANCE\nModel: ${document.getElementById('bm-model').value.trim()}\nLast Serviced: ${document.getElementById('bm-last').value.trim()}\nTire PSI: ${document.getElementById('bm-tire').value.trim()}`;
+            case 'car_maintenance':
+                return `CAR MAINTENANCE\nModel: ${document.getElementById('cm-model').value.trim()}\nVIN: ${document.getElementById('cm-vin').value.trim()}\nOil: ${document.getElementById('cm-oil').value.trim()}\nTires: ${document.getElementById('cm-tire').value.trim()}`;
+            case 'wifi_extender':
+                return `WIFI EXTENDER SETUP\nSSID: ${document.getElementById('we-ssid').value.trim()}\nAdmin IP: ${document.getElementById('we-ip').value.trim()}\nAdmin Pass: ${document.getElementById('we-pass').value.trim()}`;
+            case 'alarm_code':
+                return `SECURITY ALARM\nSystem: ${document.getElementById('ac-name').value.trim()}\nArm: ${document.getElementById('ac-arm').value.trim()}\nDisarm: ${document.getElementById('ac-disarm').value.trim()}\nGuest: ${document.getElementById('ac-guest').value.trim()}`;
+            case 'gym_routine':
+                return `GYM ROUTINE: ${document.getElementById('gr-name').value.trim()}\nTarget: ${document.getElementById('gr-target').value.trim()}\n\nExercises:\n${document.getElementById('gr-ex').value.trim()}`;
+            case 'bp_log':
+                return `BP LOG\nDate: ${document.getElementById('bpl-date').value.trim()}\nSystolic: ${document.getElementById('bpl-sys').value.trim()}\nDiastolic: ${document.getElementById('bpl-dia').value.trim()}\nHR: ${document.getElementById('bpl-hr').value.trim()}`;
+            case 'vitamin_schedule':
+                return `VITAMIN SCHEDULE\nSupplement: ${document.getElementById('vs-name').value.trim()}\nDosage: ${document.getElementById('vs-dose').value.trim()}\nTime: ${document.getElementById('vs-time').value.trim()}`;
+            case 'bedtime_routine':
+                return `BEDTIME ROUTINE\nTarget Bed: ${document.getElementById('br-bed').value.trim()}\nTarget Wake: ${document.getElementById('br-wake').value.trim()}\n\nWind-down:\n${document.getElementById('br-steps').value.trim()}`;
+            case 'habit_tracker':
+                return `HABIT TRACKER\n1. ${document.getElementById('ht-1').value.trim()}\n2. ${document.getElementById('ht-2').value.trim()}\n3. ${document.getElementById('ht-3').value.trim()}\nFrequency: ${document.getElementById('ht-freq').value.trim()}`;
+            case 'budget_tracker':
+                return `BUDGET TRACKER\nMonth: ${document.getElementById('bt-month').value.trim()}\nTotal: ${document.getElementById('bt-total').value.trim()}\nHousing: ${document.getElementById('bt-house').value.trim()}\nSavings: ${document.getElementById('bt-save').value.trim()}`;
+            case 'evac_route':
+                return `EVACUATION ROUTE\nMeeting Pt: ${document.getElementById('er-meet').value.trim()}\nExit: ${document.getElementById('er-pri').value.trim()}\nContact: ${document.getElementById('er-contact').value.trim()}`;
+            case 'office_visitor':
+                return `OFFICE VISITOR\nCompany: ${document.getElementById('ov-comp').value.trim()}\nRoom: ${document.getElementById('ov-room').value.trim()}\nGuest WiFi: ${document.getElementById('ov-wifi').value.trim()}\nWiFi Pass: ${document.getElementById('ov-pass').value.trim()}`;
+            case 'project_board':
+                return `PROJECT: ${document.getElementById('pb-name').value.trim()}\nPhase: ${document.getElementById('pb-phase').value.trim()}\nNext Milestone: ${document.getElementById('pb-mile').value.trim()}\nDeadline: ${document.getElementById('pb-due').value.trim()}`;
+
             default:
                 return '';
         }
@@ -1723,6 +2413,7 @@ class QRGeneratorPro {
         const ssid = document.getElementById('wifi-ssid').value.trim();
         const password = document.getElementById('wifi-password').value.trim();
         const security = document.getElementById('wifi-security').value;
+        const hidden = document.getElementById('wifi-hidden').value;
 
         if (!ssid) return '';
 
@@ -1733,7 +2424,8 @@ class QRGeneratorPro {
             wifi += `P:${this.escapeWiFiString(password)};`;
         }
 
-        wifi += 'H:false;;'; // Hidden network: false
+        wifi += `H:${hidden};;`; // Hidden network
+
 
         console.log('Generated WiFi:', wifi);
         return wifi;
@@ -1904,48 +2596,6 @@ class QRGeneratorPro {
         return upi;
     }
 
-    updateBankFields() {
-        const region = document.getElementById('bank-region').value;
-        const ifscGroup = document.getElementById('bank-ifsc-group');
-        const swiftGroup = document.getElementById('bank-swift-group');
-
-        if (region === 'india') {
-            ifscGroup.style.display = 'block';
-            swiftGroup.style.display = 'none';
-        } else {
-            ifscGroup.style.display = 'none';
-            swiftGroup.style.display = 'block';
-        }
-    }
-
-    generateBank() {
-        const region = document.getElementById('bank-region').value;
-        const bankName = document.getElementById('bank-name').value;
-        const beneficiary = document.getElementById('bank-beneficiary').value.trim();
-        const account = document.getElementById('bank-account').value.trim();
-        const amount = document.getElementById('bank-amount').value.trim();
-
-        if (!beneficiary || !account) return '';
-
-        let bankData = '';
-
-        if (region === 'india') {
-            const ifsc = document.getElementById('bank-ifsc').value.trim().toUpperCase();
-            // Indian bank transfer format
-            bankData = `Bank Transfer\nBeneficiary: ${beneficiary}\nAccount: ${account}\nIFSC: ${ifsc}`;
-            if (bankName) bankData += `\nBank: ${bankName.toUpperCase()}`;
-            if (amount) bankData += `\nAmount: ₹${amount}`;
-        } else {
-            const swift = document.getElementById('bank-swift').value.trim().toUpperCase();
-            // International SWIFT format
-            bankData = `International Transfer\nBeneficiary: ${beneficiary}\nAccount: ${account}\nSWIFT/BIC: ${swift}`;
-            if (bankName) bankData += `\nBank: ${bankName.toUpperCase()}`;
-            if (amount) bankData += `\nAmount: ${amount}`;
-        }
-
-        console.log('Generated Bank:', bankData);
-        return bankData;
-    }
 
     generateEvent() {
         const title = document.getElementById('event-title').value.trim();
@@ -1954,21 +2604,35 @@ class QRGeneratorPro {
         const startTime = document.getElementById('event-start-time').value;
         const endDate = document.getElementById('event-end-date').value;
         const endTime = document.getElementById('event-end-time').value;
+        const isAllDay = document.getElementById('event-allday').value === 'true';
+        const tz = document.getElementById('event-timezone').value;
         const description = document.getElementById('event-description').value.trim();
 
-        if (!title || !startDate || !startTime || !endDate || !endTime) return '';
+        if (!title || !startDate || !endDate) return '';
+        if (!isAllDay && (!startTime || !endTime)) return '';
 
         // Convert to iCalendar format
-        const formatDateTime = (date, time) => {
-            return date.replace(/-/g, '') + 'T' + time.replace(/:/g, '') + '00';
+        const formatDateTime = (date, time, isAllDay, tz) => {
+            if (isAllDay) {
+                return `VALUE=DATE:${date.replace(/-/g, '')}`;
+            }
+            let dt = `${date.replace(/-/g, '')}T${time.replace(/:/g, '')}00`;
+            if (tz === 'Z') dt += 'Z';
+            return dt;
         };
 
         // iCalendar VEVENT format
         let event = 'BEGIN:VCALENDAR\r\n';
         event += 'VERSION:2.0\r\n';
         event += 'BEGIN:VEVENT\r\n';
-        event += `DTSTART:${formatDateTime(startDate, startTime)}\r\n`;
-        event += `DTEND:${formatDateTime(endDate, endTime)}\r\n`;
+        
+        if (isAllDay) {
+            event += `DTSTART;${formatDateTime(startDate, null, true, tz)}\r\n`;
+            event += `DTEND;${formatDateTime(endDate, null, true, tz)}\r\n`;
+        } else {
+            event += `DTSTART:${formatDateTime(startDate, startTime, false, tz)}\r\n`;
+            event += `DTEND:${formatDateTime(endDate, endTime, false, tz)}\r\n`;
+        }
         event += `SUMMARY:${title}\r\n`;
 
         if (location) {
@@ -2059,40 +2723,6 @@ class QRGeneratorPro {
         return data;
     }
 
-    generatePDF() {
-        const url = document.getElementById('pdf-url').value.trim();
-        if (!url) return '';
-        return url.startsWith('http') ? url : `https://${url}`;
-    }
-
-    generateApp() {
-        const url = document.getElementById('app-url').value.trim();
-        if (!url) return '';
-        return url;
-    }
-
-    generateMeeting() {
-        const platform = document.getElementById('meeting-platform').value;
-        const id = document.getElementById('meeting-id').value.trim();
-
-        if (!id) return '';
-
-        if (id.startsWith('http')) return id;
-
-        // Basic URL constructions if only ID is provided
-        switch (platform) {
-            case 'zoom': return `https://zoom.us/j/${id}`;
-            case 'meet': return `https://meet.google.com/${id}`;
-            case 'teams': return id; // Teams links are too complex to construct from ID
-            default: return id;
-        }
-    }
-
-    generateMusic() {
-        const url = document.getElementById('music-url').value.trim();
-        if (!url) return '';
-        return url;
-    }
 
     generatePayPal() {
         const user = document.getElementById('paypal-user').value.trim();
@@ -2123,13 +2753,187 @@ class QRGeneratorPro {
     generateMedical() {
         const name = document.getElementById('medical-name').value.trim();
         const blood = document.getElementById('medical-blood').value.trim();
+        const donor = document.getElementById('medical-donor').value.trim();
+        const contactName = document.getElementById('medical-contact-name').value.trim();
+        const contactPhone = document.getElementById('medical-contact-phone').value.trim();
+        const allergies = document.getElementById('medical-allergies').value.trim();
+        const meds = document.getElementById('medical-meds').value.trim();
         const conditions = document.getElementById('medical-conditions').value.trim();
 
         if (!name) return '';
 
         let info = `MEDICAL EMERGENCY INFO\nName: ${name}`;
         if (blood) info += `\nBlood Type: ${blood}`;
+        if (donor) info += `\nOrgan Donor: ${donor}`;
+        if (contactName || contactPhone) {
+            info += `\nEmerg. Contact: ${contactName} ${contactPhone}`.trim();
+        }
+        if (allergies) info += `\nAllergies: ${allergies}`;
+        if (meds) info += `\nMedications: ${meds}`;
         if (conditions) info += `\nConditions: ${conditions}`;
+
+        return info;
+    }
+
+    generateHealthInsurance() {
+        const provider = document.getElementById('hi-provider').value.trim();
+        const member = document.getElementById('hi-member').value.trim();
+        const group = document.getElementById('hi-group').value.trim();
+        const plan = document.getElementById('hi-plan').value.trim();
+        const phone = document.getElementById('hi-phone').value.trim();
+
+        if (!provider || !member) return '';
+
+        let info = `HEALTH INSURANCE INFO\nProvider: ${provider}\nMember ID: ${member}`;
+        if (group) info += `\nGroup No: ${group}`;
+        if (plan) info += `\nPlan Type: ${plan}`;
+        if (phone) info += `\nProvider Phone: ${phone}`;
+
+        return info;
+    }
+
+    generateVaccine() {
+        const name = document.getElementById('vac-name').value.trim();
+        const date = document.getElementById('vac-date').value;
+        const clinic = document.getElementById('vac-clinic').value.trim();
+        const batch = document.getElementById('vac-batch').value.trim();
+
+        if (!name || !date) return '';
+
+        let info = `VACCINATION RECORD\nVaccine: ${name}\nDate: ${date}`;
+        if (clinic) info += `\nClinic/Doctor: ${clinic}`;
+        if (batch) info += `\nBatch Number: ${batch}`;
+
+        return info;
+    }
+
+    generateAllergyAlert() {
+        const name = document.getElementById('allergy-name').value.trim();
+        const list = document.getElementById('allergy-list').value.trim();
+        const symptoms = document.getElementById('allergy-symptoms').value.trim();
+        const action = document.getElementById('allergy-action').value.trim();
+        const epipen = document.getElementById('allergy-epipen').value;
+
+        if (!name || !list) return '';
+
+        let info = `ALLERGY ALERT\nName: ${name}\nAllergies: ${list}`;
+        if (symptoms) info += `\nSymptoms: ${symptoms}`;
+        if (action) info += `\nTreatment: ${action}`;
+        if (epipen !== 'N/A') info += `\nCarries EpiPen: ${epipen}`;
+
+        return info;
+    }
+
+    generateMedicationTracker() {
+        const patient = document.getElementById('med-patient').value.trim();
+        const name1 = document.getElementById('med-name-1').value.trim();
+        const dose1 = document.getElementById('med-dosage-1').value.trim();
+        const freq1 = document.getElementById('med-freq-1').value.trim();
+        const name2 = document.getElementById('med-name-2').value.trim();
+        const dose2 = document.getElementById('med-dosage-2').value.trim();
+        const freq2 = document.getElementById('med-freq-2').value.trim();
+        const instructions = document.getElementById('med-instructions').value.trim();
+
+        if (!patient || !name1 || !dose1 || !freq1) return '';
+
+        let info = `MEDICATION SCHEDULE\nPatient: ${patient}\nMed 1: ${name1} (${dose1}) - ${freq1}`;
+        if (name2 && dose2 && freq2) {
+            info += `\nMed 2: ${name2} (${dose2}) - ${freq2}`;
+        }
+        if (instructions) info += `\nInstructions: ${instructions}`;
+
+        return info;
+    }
+
+    generateIceContacts() {
+        const name1 = document.getElementById('ice-name-1').value.trim();
+        const rel1 = document.getElementById('ice-rel-1').value.trim();
+        const phone1 = document.getElementById('ice-phone-1').value.trim();
+        const name2 = document.getElementById('ice-name-2').value.trim();
+        const rel2 = document.getElementById('ice-rel-2').value.trim();
+        const phone2 = document.getElementById('ice-phone-2').value.trim();
+        const hospital = document.getElementById('ice-hospital').value.trim();
+
+        if (!name1 || !rel1 || !phone1) return '';
+
+        let info = `EMERGENCY CONTACTS (ICE)\nPrimary: ${name1} (${rel1}) - ${phone1}`;
+        if (name2 && rel2 && phone2) {
+            info += `\nSecondary: ${name2} (${rel2}) - ${phone2}`;
+        }
+        if (hospital) info += `\nPref. Hospital: ${hospital}`;
+
+        return info;
+    }
+
+    generateBloodDonor() {
+        const name = document.getElementById('donor-name').value.trim();
+        const blood = document.getElementById('donor-blood').value;
+        const donorId = document.getElementById('donor-id').value.trim();
+        const lastDate = document.getElementById('donor-last-date').value;
+        const center = document.getElementById('donor-center').value.trim();
+
+        if (!name || !blood) return '';
+
+        let info = `BLOOD DONOR PROFILE\nName: ${name}\nBlood Group: ${blood}`;
+        if (donorId) info += `\nDonor ID: ${donorId}`;
+        if (lastDate) info += `\nLast Donation: ${lastDate}`;
+        if (center) info += `\nDonation Center: ${center}`;
+
+        return info;
+    }
+
+    generateVisionRx() {
+        const name = document.getElementById('vision-name').value.trim();
+        const odSph = document.getElementById('vision-od-sph').value.trim();
+        const odCyl = document.getElementById('vision-od-cyl').value.trim();
+        const odAxis = document.getElementById('vision-od-axis').value.trim();
+        const osSph = document.getElementById('vision-os-sph').value.trim();
+        const osCyl = document.getElementById('vision-os-cyl').value.trim();
+        const osAxis = document.getElementById('vision-os-axis').value.trim();
+        const pd = document.getElementById('vision-pd').value.trim();
+
+        if (!name) return '';
+
+        let info = `VISION PRESCRIPTION\nPatient: ${name}`;
+        if (odSph || odCyl || odAxis) {
+            info += `\nOD (Right): SPH ${odSph || '0.00'} | CYL ${odCyl || '0.00'} | AXIS ${odAxis || '0'}`;
+        }
+        if (osSph || osCyl || osAxis) {
+            info += `\nOS (Left): SPH ${osSph || '0.00'} | CYL ${osCyl || '0.00'} | AXIS ${osAxis || '0'}`;
+        }
+        if (pd) info += `\nPupillary Distance (PD): ${pd}`;
+
+        return info;
+    }
+
+    generatePetMedical() {
+        const name = document.getElementById('pet-name').value.trim();
+        const breed = document.getElementById('pet-breed').value.trim();
+        const chip = document.getElementById('pet-microchip').value.trim();
+        const conditions = document.getElementById('pet-conditions').value.trim();
+        const vet = document.getElementById('pet-vet').value.trim();
+
+        if (!name || !breed) return '';
+
+        let info = `PET MEDICAL INFO\nPet Name: ${name}\nSpecies/Breed: ${breed}`;
+        if (chip) info += `\nMicrochip: ${chip}`;
+        if (conditions) info += `\nConditions/Allergies: ${conditions}`;
+        if (vet) info += `\nVet: ${vet}`;
+
+        return info;
+    }
+
+    generateAdvanceDirective() {
+        const name = document.getElementById('ad-name').value.trim();
+        const proxyName = document.getElementById('ad-proxy-name').value.trim();
+        const proxyPhone = document.getElementById('ad-proxy-phone').value.trim();
+        const dnr = document.getElementById('ad-dnr').value;
+        const location = document.getElementById('ad-doc-location').value.trim();
+
+        if (!name || !proxyName || !proxyPhone || !dnr) return '';
+
+        let info = `ADVANCE HEALTHCARE DIRECTIVE\nPatient: ${name}\nDirective: ${dnr}\nProxy Contact: ${proxyName} (${proxyPhone})`;
+        if (location) info += `\nDocument Stored at: ${location}`;
 
         return info;
     }
@@ -2185,6 +2989,24 @@ class QRGeneratorPro {
                 return 'PayPal.me Link';
             case 'medical':
                 return 'Medical Info Card';
+            case 'health_insurance':
+                return 'Health Insurance Card';
+            case 'vaccine':
+                return 'Vaccination Record';
+            case 'allergy_alert':
+                return 'Allergy Alert';
+            case 'medication_tracker':
+                return 'Med Schedule';
+            case 'ice_contacts':
+                return 'ICE Contacts';
+            case 'blood_donor':
+                return 'Blood Donor Profile';
+            case 'vision_rx':
+                return 'Vision Prescription';
+            case 'pet_medical':
+                return 'Pet Health Card';
+            case 'advance_directive':
+                return 'Living Will / DNR';
             case 'donate':
                 return 'Donation Page';
             case 'discord':
@@ -2211,13 +3033,6 @@ class QRGeneratorPro {
             case 'yt': return 'YouTube Action';
             case 'yl': return 'Yelp Place';
             case 'im': return 'IMDb Movie';
-            case 'fq': return 'Foursquare Venue';
-            case 'as': return 'App Store Search';
-            case 'ps': return 'Play Store Search';
-            case 'prompt': return 'AI Prompt';
-            case 'totp': return 'Authenticator 2FA';
-            case 'uber': return 'Uber Ride';
-            case 'lyft': return 'Lyft Ride';
             default:
                 return this.qrData.length > 30 ? this.qrData.substring(0, 30) + '...' : this.qrData;
         }
@@ -2592,13 +3407,15 @@ class QRGeneratorPro {
             canvas.onclick = () => {
                 window.open('https://coralgenz.wordpress.com', '_blank');
             };
-
             // Update tooltip
             canvas.title = 'Click or scan to visit coralgenz.wordpress.com';
         }
     }
 
-    validateQRData() {
+    validateQRData(quiet = false) {
+        // If quiet is true, we don't trigger side effects or errors
+        if (!this.qrData) return false;
+
         switch (this.selectedType) {
             case 'text':
                 return this.qrData.length > 0;
@@ -2654,6 +3471,15 @@ class QRGeneratorPro {
             return;
         }
 
+        // Clear serial number if logo is uploaded
+        if (this.customization.serialNumber) {
+            const serialInput = document.getElementById('serial-number-input');
+            const clearSerialBtn = document.getElementById('clear-serial-btn');
+            if (serialInput) serialInput.value = '';
+            if (clearSerialBtn) clearSerialBtn.style.display = 'none';
+            this.customization.serialNumber = null;
+        }
+
         // Validate file size (max 5MB)
         if (file.size > 5 * 1024 * 1024) {
             this.showNotification('Image file is too large. Please select a file smaller than 5MB.', 'error');
@@ -2670,6 +3496,7 @@ class QRGeneratorPro {
                     this.customization.logo = e.target.result;
                     this.showLogoPreview(e.target.result);
                     this.showNotification('Logo uploaded successfully!', 'success');
+                    this.generateLiveQR();
                     console.log('Logo uploaded:', {
                         size: file.size,
                         type: file.type,
@@ -2705,14 +3532,22 @@ class QRGeneratorPro {
         this.customization.logo = null;
         document.getElementById('logo-preview').style.display = 'none';
         document.getElementById('logo-upload').value = '';
+        this.generateLiveQR();
     }
 
-    async generateQR() {
+    clearQRCanvas() {
+        const container = document.querySelector('.qr-container');
+        if (container) {
+            // Reset to empty canvas
+            container.innerHTML = '<canvas id="qr-canvas"></canvas>';
+        }
+    }
+
+    async generateLiveQR() {
         if (this.isGenerating) return;
 
         // Check if library is ready
         if (!this.libraryReady) {
-            this.showError('QR library is still loading. Please wait a moment and try again.');
             return;
         }
 
@@ -2720,56 +3555,28 @@ class QRGeneratorPro {
         this.qrData = this.collectInputData();
 
         if (!this.qrData) {
-            console.error('No QR data collected!');
-            this.showValidationError();
-            return;
+            this.clearQRCanvas();
+            return; // Don't generate if data is empty
         }
 
-        // Validate data based on type
-        if (!this.validateQRData()) {
-            console.error('QR data validation failed');
-            this.showValidationError();
-            return;
+        // Quietly validate data without error messages for live typing
+        try {
+            if (!this.validateQRData(true)) {
+                this.clearQRCanvas();
+                return;
+            }
+        } catch(e) { 
+            this.clearQRCanvas();
+            return; 
         }
-
-        console.log('=== QR GENERATION DEBUG ===');
-        console.log('Selected Type:', this.selectedType);
-        console.log('QR Data:', this.qrData);
-        console.log('QR Data Length:', this.qrData.length);
-        console.log('QR Method:', this.qrMethod);
-        console.log('========================');
 
         this.isGenerating = true;
 
-        // Go directly to result page
-        this.goToPage(4);
-
-        // Wait for page transition to complete
-        await new Promise(resolve => setTimeout(resolve, 100));
-
-        // Show appropriate animation based on type
-        if (this.selectedType === 'barcode') {
-            await this.showBarcodeAnimation();
-        } else {
-            await this.showSmoothBuildingAnimation();
-        }
-
         try {
-            // Animation completed, code is ready to be built
-
             await this.createQRCode();
-            await this.showSuccessAnimation();
-
-            // Save to history after successful generation
-            this.saveToHistory(this.selectedType, this.qrData, this.getDisplayText());
-
-            // Auto-download if enabled in settings
-            if (this.appSettings && this.appSettings.autoDownload) {
-                setTimeout(() => this.downloadQR(), 800);
-            }
         } catch (error) {
             console.error('Generation error:', error);
-            this.showError(`Failed to generate ${this.selectedType === 'barcode' ? 'barcode' : 'QR code'}: ${error.message}`);
+            this.clearQRCanvas();
         } finally {
             this.isGenerating = false;
         }
@@ -2804,6 +3611,7 @@ class QRGeneratorPro {
         canvas.width = size;
         canvas.height = size;
 
+        const ecLevel = this.appSettings && this.appSettings.errorCorrection ? this.appSettings.errorCorrection : 'M';
         // QR generation options - use higher error correction for logos
         const options = {
             width: size,
@@ -2813,7 +3621,7 @@ class QRGeneratorPro {
                 dark: this.customization.fgColor,
                 light: this.customization.bgColor
             },
-            errorCorrectionLevel: 'H' // Force high error correction for maximum scannability
+            errorCorrectionLevel: this.customization.logo ? 'H' : ecLevel // Force high error correction for maximum scannability if logo present
         };
 
         try {
@@ -2822,9 +3630,11 @@ class QRGeneratorPro {
 
 
 
-            // Add logo if present
+            // Add logo or serial number if present (mutually exclusive)
             if (this.customization.logo) {
                 await this.addLogo(canvas);
+            } else if (this.customization.serialNumber) {
+                await this.addSerialNumber(canvas);
             }
 
         } catch (error) {
@@ -3307,6 +4117,63 @@ class QRGeneratorPro {
         });
     }
 
+    async addSerialNumber(canvas) {
+        if (!this.customization.serialNumber) {
+            return Promise.resolve();
+        }
+
+        return new Promise((resolve) => {
+            try {
+                const ctx = canvas.getContext('2d');
+                const canvasSize = canvas.width;
+
+                const text = this.customization.serialNumber;
+                
+                // Max box size: 40% width, 15% height
+                const maxBoxWidth = Math.floor(canvasSize * 0.4);
+                const maxBoxHeight = Math.floor(canvasSize * 0.15);
+                
+                let fontSize = Math.floor(maxBoxHeight * 0.6);
+                ctx.font = `bold ${fontSize}px Arial, sans-serif`;
+                let textMetrics = ctx.measureText(text);
+                
+                // Scale down if too wide
+                if (textMetrics.width > maxBoxWidth * 0.9) {
+                    fontSize = Math.floor(fontSize * ((maxBoxWidth * 0.9) / textMetrics.width));
+                    ctx.font = `bold ${fontSize}px Arial, sans-serif`;
+                    textMetrics = ctx.measureText(text);
+                }
+
+                const paddingX = Math.floor(fontSize * 0.8);
+                const paddingY = Math.floor(fontSize * 0.5);
+                const boxWidth = textMetrics.width + (paddingX * 2);
+                const boxHeight = fontSize + (paddingY * 2);
+                
+                const x = Math.floor((canvasSize - boxWidth) / 2);
+                const y = Math.floor((canvasSize - boxHeight) / 2);
+
+                // Draw background box to create a "cutout" space
+                ctx.fillStyle = this.customization.bgColor || '#ffffff';
+                ctx.save();
+                this.roundRect(ctx, x, y, boxWidth, boxHeight, Math.floor(boxHeight * 0.15));
+                ctx.fill();
+                ctx.restore();
+
+                // Draw text
+                ctx.fillStyle = this.customization.fgColor || '#000000';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(text, x + boxWidth / 2, y + boxHeight / 2 + (fontSize * 0.05));
+
+                console.log('Serial number added successfully');
+                resolve();
+            } catch (error) {
+                console.error('Error adding serial number:', error);
+                resolve();
+            }
+        });
+    }
+
     showValidationError() {
         // Highlight required fields
         const requiredInputs = document.querySelectorAll('.form-input[required]');
@@ -3637,6 +4504,7 @@ class QRGeneratorPro {
     }
 
     async generateQRToCanvas(canvas) {
+        const ecLevel = this.appSettings && this.appSettings.errorCorrection ? this.appSettings.errorCorrection : 'M';
         const options = {
             width: this.customization.size,
             height: this.customization.size,
@@ -3645,7 +4513,7 @@ class QRGeneratorPro {
                 dark: this.customization.fgColor,
                 light: this.customization.bgColor
             },
-            errorCorrectionLevel: 'M'
+            errorCorrectionLevel: this.customization.logo ? 'H' : ecLevel
         };
 
         return this.generateQRWithMethod(canvas, this.qrData, options);
@@ -3924,11 +4792,54 @@ class QRGeneratorPro {
     }
 
     downloadQR() {
+        // Save to history on manual download since we no longer save on every live edit
+        if (this.qrData) {
+            this.saveToHistory(this.selectedType, this.qrData, this.getDisplayText());
+        }
+
         const canvas = document.getElementById('qr-canvas');
-        const link = document.createElement('a');
-        link.download = `qrcode-${this.selectedType}-${Date.now()}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
+        if (!canvas) return;
+
+        // Make sure background is opaque white if transparent
+        const downloadCanvas = document.createElement('canvas');
+        const padding = 20; // Add some padding around the QR code
+        downloadCanvas.width = canvas.width + padding * 2;
+        downloadCanvas.height = canvas.height + padding * 2;
+        
+        const ctx = downloadCanvas.getContext('2d');
+        
+        // Fill background
+        ctx.fillStyle = this.customization.bgColor || '#ffffff';
+        ctx.fillRect(0, 0, downloadCanvas.width, downloadCanvas.height);
+        
+        // Draw the QR code
+        ctx.drawImage(canvas, padding, padding);
+
+        try {
+            const link = document.createElement('a');
+            
+            // Better filename logic
+            let filename = 'genz-qr';
+            if (this.selectedType === 'barcode') {
+                filename = 'genz-barcode';
+            }
+            
+            // Add date to make filename unique
+            const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            
+            link.download = `${filename}-${dateStr}.png`;
+            link.href = downloadCanvas.toDataURL('image/png', 1.0);
+            
+            // Trigger download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            this.showNotification('Downloaded successfully!', 'success');
+        } catch (error) {
+            console.error('Download error:', error);
+            this.showError('Failed to download image. Try right-clicking the image to save.');
+        }
     }
 
     async shareQR() {
